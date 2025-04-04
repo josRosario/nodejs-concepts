@@ -452,6 +452,293 @@ app.listen(3000, () => {
 
 El módulo `http` sigue siendo la base de cualquier servidor en Node.js, incluso cuando se usan frameworks.
 
-Similar code found with 2 license types
 
+## process.nextTick()
 
+es un método que permite ejecutar una función de callback inmediatamente después de que el Event Loop termine la fase actual, antes de que continúe con las siguientes fases. Es útil para priorizar la ejecución de ciertas tareas asincrónicas.
+
+---
+
+### Características principales:
+1. **Prioridad alta**: Las funciones pasadas a `process.nextTick()` se ejecutan antes de cualquier tarea en la cola de eventos (como `setTimeout` o `setImmediate`).
+2. **No bloquea el Event Loop**: Se ejecuta después de la operación actual, pero antes de que el Event Loop procese otras tareas pendientes.
+3. **Uso común**: Se utiliza para manejar errores, inicializar datos o dividir operaciones largas en partes más pequeñas.
+
+---
+
+### Ejemplo básico:
+
+```js
+console.log('Inicio');
+
+process.nextTick(() => {
+  console.log('Callback de nextTick');
+});
+
+console.log('Fin');
+```
+
+**Salida**:
+```
+Inicio
+Fin
+Callback de nextTick
+```
+
+---
+
+### Comparación con `setImmediate`:
+- **`process.nextTick()`**: Se ejecuta antes de que el Event Loop pase a la siguiente fase.
+- **`setImmediate()`**: Se ejecuta al final de la fase de I/O del Event Loop.
+
+```js
+setImmediate(() => {
+  console.log('setImmediate');
+});
+
+process.nextTick(() => {
+  console.log('nextTick');
+});
+
+console.log('Fin');
+```
+
+**Salida**:
+```
+Fin
+nextTick
+setImmediate
+```
+
+---
+
+### Uso práctico:
+#### 1. **Manejo de errores antes de continuar**:
+```js
+function ejemplo() {
+  process.nextTick(() => {
+    console.log('Esto se ejecuta antes de continuar');
+  });
+  console.log('Operación actual');
+}
+
+ejemplo();
+```
+
+---
+
+#### 2. **Evitar bloqueos en operaciones largas**:
+Si tienes una operación que podría bloquear el Event Loop, puedes dividirla en partes más pequeñas usando `process.nextTick()`.
+
+```js
+function operacionLarga() {
+  if (contador < 5) {
+    console.log(`Iteración ${contador}`);
+    contador++;
+    process.nextTick(operacionLarga); // Divide la operación
+  }
+}
+
+let contador = 0;
+operacionLarga();
+```
+
+---
+
+### Resumen:
+- **`process.nextTick()`** es una herramienta poderosa para priorizar tareas asincrónicas.
+- Se ejecuta antes de cualquier tarea en la cola de eventos.
+- Útil para manejar errores, inicializar datos o dividir operaciones largas.
+
+## Middleware
+un middleware es una función que se ejecuta entre que una petición llega al servidor y antes de que se envíe la respuesta. Aunque Node.js como tal no tiene un sistema de middlewares integrado, Express.js (el framework más usado) sí lo utiliza ampliamente.
+
+## 💡 ¿Qué hace un middleware?
+- Puede modificar la request (req) y la response (res).
+
+- Puede terminar el ciclo de la petición enviando una respuesta.
+
+- O puede pasar el control al siguiente middleware usando next().
+
+  ## 🧱 Sintaxis de un middleware en Express
+
+```js
+function miMiddleware(req, res, next) {
+  console.log('Middleware ejecutado');
+  next(); // pasa al siguiente middleware o ruta
+}
+app.use(miMiddleware);
+```
+
+## 🧪 Ejemplo práctico
+
+```js
+const express = require('express');
+const app = express();
+
+// Middleware global
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next(); // continúa con la siguiente función
+});
+
+// Ruta
+app.get('/', (req, res) => {
+  res.send('Hola mundo!');
+});
+
+app.listen(3000, () => {
+  console.log('Servidor corriendo en puerto 3000');
+});
+```
+
+## 🧠 Tipos de middleware en Express
+- Middleware de aplicación: afecta a toda la app (app.use()).
+
+- Middleware de ruta: solo afecta rutas específicas.
+
+- Middleware de terceros: como body-parser, cors, morgan, etc.
+
+- Middleware de error: maneja errores ((err, req, res, next)).
+
+## 🛠️ Ejemplo de middleware para validar un token
+
+```js
+function verificarToken(req, res, next) {
+  const token = req.headers['authorization'];
+  if (token === 'secreto123') {
+    next();
+  } else {
+    res.status(401).send('No autorizado');
+  }
+}
+
+app.get('/protegido', verificarToken, (req, res) => {
+  res.send('Acceso concedido');
+});
+```
+
+## fs
+El módulo **`fs`** en Node.js es un módulo nativo que proporciona una API para interactuar con el sistema de archivos. Permite realizar operaciones como leer, escribir, actualizar, eliminar y manipular archivos y directorios.
+
+---
+
+### Características principales:
+1. **Sincrónico y asincrónico**: Ofrece métodos tanto sincrónicos (bloqueantes) como asincrónicos (no bloqueantes).
+2. **Manipulación de archivos**: Permite leer, escribir, copiar, renombrar y eliminar archivos.
+3. **Manipulación de directorios**: Permite crear, leer y eliminar directorios.
+4. **Streams**: Soporta operaciones de lectura y escritura en streams para manejar grandes volúmenes de datos.
+
+---
+
+### Ejemplo básico: Leer un archivo
+
+```js
+const fs = require('fs');
+
+// Leer un archivo de forma asincrónica
+fs.readFile('archivo.txt', 'utf8', (err, data) => {
+  if (err) {
+    console.error('Error al leer el archivo:', err);
+    return;
+  }
+  console.log('Contenido del archivo:', data);
+});
+```
+
+---
+
+### Métodos comunes del módulo `fs`:
+
+#### 1. **`fs.readFile`**: Leer un archivo
+```js
+fs.readFile('archivo.txt', 'utf8', (err, data) => {
+  if (err) throw err;
+  console.log(data);
+});
+```
+
+#### 2. **`fs.writeFile`**: Escribir en un archivo
+```js
+fs.writeFile('archivo.txt', 'Hola, mundo!', (err) => {
+  if (err) throw err;
+  console.log('Archivo escrito con éxito');
+});
+```
+
+#### 3. **`fs.appendFile`**: Agregar contenido a un archivo
+```js
+fs.appendFile('archivo.txt', '\nNueva línea', (err) => {
+  if (err) throw err;
+  console.log('Contenido agregado');
+});
+```
+
+#### 4. **`fs.unlink`**: Eliminar un archivo
+```js
+fs.unlink('archivo.txt', (err) => {
+  if (err) throw err;
+  console.log('Archivo eliminado');
+});
+```
+
+#### 5. **`fs.mkdir`**: Crear un directorio
+```js
+fs.mkdir('nueva_carpeta', (err) => {
+  if (err) throw err;
+  console.log('Directorio creado');
+});
+```
+
+#### 6. **`fs.readdir`**: Leer el contenido de un directorio
+```js
+fs.readdir('.', (err, files) => {
+  if (err) throw err;
+  console.log('Archivos en el directorio:', files);
+});
+```
+
+---
+
+### Uso con Promesas:
+Desde Node.js 10, puedes usar el módulo `fs.promises` para trabajar con promesas en lugar de callbacks.
+
+```js
+const fs = require('fs').promises;
+
+async function leerArchivo() {
+  try {
+    const data = await fs.readFile('archivo.txt', 'utf8');
+    console.log(data);
+  } catch (err) {
+    console.error('Error al leer el archivo:', err);
+  }
+}
+
+leerArchivo();
+```
+
+---
+
+### Streams con `fs`:
+El módulo `fs` también permite trabajar con streams para manejar grandes volúmenes de datos de manera eficiente.
+
+#### Leer un archivo como stream:
+```js
+const readStream = fs.createReadStream('archivo_grande.txt', 'utf8');
+readStream.on('data', (chunk) => {
+  console.log('Chunk recibido:', chunk);
+});
+```
+
+#### Escribir en un archivo como stream:
+```js
+const writeStream = fs.createWriteStream('archivo_salida.txt');
+writeStream.write('Primera línea\n');
+writeStream.end('Última línea');
+```
+
+---
+
+### Resumen:
+El módulo **`fs`** es esencial para trabajar con el sistema de archivos en Node.js. Ofrece una API flexible que soporta operaciones sincrónicas, asincrónicas y basadas en promesas, lo que lo hace ideal para manejar archivos y directorios de manera eficiente.
