@@ -245,3 +245,61 @@ if (cluster.isMaster) {
 - Mejora la concurrencia en apps de alto tráfico.
 
 - Aísla errores: si un worker falla, no tumba toda la app.
+
+
+## Buffer 
+un Buffer es una estructura de datos que permite manejar directamente datos binarios en memoria sin necesidad de convertirlos a strings.
+
+Se usa principalmente cuando se trabaja con:
+
+- Archivos
+
+- Streams
+
+- Redes (sockets)
+
+- Criptografía
+
+
+## 🧠 ¿Por qué existe Buffer?
+Porque JavaScript no tiene soporte nativo para manipular datos binarios. Node.js lo necesita para operaciones de bajo nivel como leer archivos, datos de red, etc.
+
+## 📦 ¿Qué es exactamente un Buffer?
+Es como un array de bytes (valores entre 0 y 255), pero más eficiente para tareas de entrada/salida.
+
+
+## 🛠️ Crear un Buffer
+```js
+// Desde un string
+const buf = Buffer.from('Hola');
+console.log(buf); // <Buffer 48 6f 6c 61>
+
+// Desde un array de bytes
+const buf2 = Buffer.from([72, 111, 108, 97]);
+console.log(buf2.toString()); // 'Hola'
+
+// Buffer vacío de 10 bytes
+const buf3 = Buffer.alloc(10);
+```
+
+## 🧪 Métodos útiles de Buffer
+```js
+const buf = Buffer.from('Node.js');
+
+// Acceder a bytes
+console.log(buf[0]); // 78 (código ASCII de 'N')
+
+// Convertir a string
+console.log(buf.toString()); // 'Node.js'
+
+// Escribir en buffer
+buf.write('Hola');
+console.log(buf.toString()); // 'Hola.js'
+
+```
+## ⚠️ Notas importantes
+- Buffers son de tamaño fijo.
+
+- Muy usados internamente por Streams.
+
+- Puedes trabajar con diferentes codificaciones: 'utf8', 'ascii', 'base64', 'hex', etc.
