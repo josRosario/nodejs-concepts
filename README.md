@@ -62,9 +62,9 @@ saludo('Juan', () => console.log('¡Saludos completados!'));
 
 ```
 
-En Node.js, la diferencia entre `import` y `require` radica en el sistema de módulos que utilizan y en cómo se comportan:
+# import y require 
 
----
+
 
 ### 1. **`require`**:
    - Forma parte del sistema de módulos **CommonJS**.
@@ -190,3 +190,58 @@ readableStream.pipe(writableStream);
 - 'error': si ocurre algún error.
 
 - 'finish': cuando se termina de escribir.
+
+## cluster
+Un cluster es un módulo que permite crear múltiples procesos hijos (workers) que se ejecutan simultáneamente y comparten el mismo servidor (puerto). Esto es útil porque Node.js corre en un solo hilo (single-threaded), y con clusters puedes aprovechar múltiples núcleos de CPU para mejorar el rendimiento.
+
+## 💡 ¿Para qué sirve cluster?
+Node.js por defecto no puede usar más de un núcleo de CPU. Con cluster, puedes crear varios procesos que corren el mismo código y balancean la carga entre ellos. Esto mejora la escalabilidad de una app, especialmente si es un servidor HTTP.
+
+
+## 🧠 Cómo funciona
+- El proceso principal (master) crea varios procesos worker.
+
+- Todos los workers comparten el mismo puerto.
+
+- Cuando llega una petición, Node.js distribuye la carga entre los workers.
+
+```js
+const cluster = require('cluster');
+const http = require('http');
+const os = require('os');
+
+const numCPUs = os.cpus().length;
+
+if (cluster.isMaster) {
+  console.log(`Master PID: ${process.pid}`);
+
+  // Crear un worker por cada núcleo
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  // Cuando un worker muere, se crea uno nuevo
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} murió. Creando uno nuevo...`);
+    cluster.fork();
+  });
+
+} else {
+  // Código que ejecutará cada worker
+  http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end(`Hola desde el worker ${process.pid}\n`);
+  }).listen(3000);
+
+  console.log(`Worker ${process.pid} iniciado`);
+}
+
+```
+
+
+## ✅ Beneficios
+- Aprovecha todos los núcleos de CPU.
+
+- Mejora la concurrencia en apps de alto tráfico.
+
+- Aísla errores: si un worker falla, no tumba toda la app.
