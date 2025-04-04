@@ -1660,3 +1660,161 @@ node script.js --name=Juan --age=30
 - **`process.argv`** es un array que contiene los argumentos pasados al script desde la línea de comandos.
 - Es útil para crear scripts dinámicos y herramientas CLI.
 - Puedes procesar los argumentos para extraer valores clave y personalizar el comportamiento del script.
+
+## ¿Qué es morgan en Node.js?
+ morgan es un middleware que se usa para registrar las solicitudes HTTP en el servidor.
+
+ ```js
+const morgan = require('morgan');
+app.use(morgan('dev'));  // Registra las solicitudes HTTP en formato de desarrollo
+
+```
+
+
+## helmet
+
+**Helmet** es un middleware de seguridad para aplicaciones **Express.js** que ayuda a protegerlas configurando encabezados HTTP de manera adecuada. Su objetivo principal es reducir las vulnerabilidades comunes relacionadas con los encabezados HTTP, como ataques de **Cross-Site Scripting (XSS)**, **Clickjacking**, y **Inyección de código**.
+
+---
+
+### Características principales:
+1. **Protección contra XSS**: Configura encabezados para evitar la ejecución de scripts maliciosos.
+2. **Prevención de Clickjacking**: Usa el encabezado `X-Frame-Options` para evitar que tu sitio sea incrustado en iframes.
+3. **Ocultación de tecnología**: Elimina el encabezado `X-Powered-By` para no revelar que tu aplicación usa Express.
+4. **Control de caché**: Configura encabezados para manejar el almacenamiento en caché.
+5. **Configuración modular**: Puedes habilitar o deshabilitar protecciones específicas según tus necesidades.
+
+---
+
+### Instalación:
+Para usar Helmet, primero instálalo con **npm**:
+
+```bash
+npm install helmet
+```
+
+---
+
+### Uso básico:
+```js
+const express = require('express');
+const helmet = require('helmet');
+
+const app = express();
+
+// Usar Helmet para proteger la aplicación
+app.use(helmet());
+
+app.get('/', (req, res) => {
+  res.send('Hola, mundo seguro!');
+});
+
+app.listen(3000, () => {
+  console.log('Servidor ejecutándose en http://localhost:3000');
+});
+```
+
+---
+
+### Funcionalidades específicas:
+Helmet incluye varias protecciones que puedes habilitar o deshabilitar según tus necesidades:
+
+1. **`helmet.hidePoweredBy()`**:
+   - Elimina el encabezado `X-Powered-By` para no revelar que usas Express.
+   ```js
+   app.use(helmet.hidePoweredBy());
+   ```
+
+2. **`helmet.frameguard()`**:
+   - Previene ataques de Clickjacking configurando el encabezado `X-Frame-Options`.
+   ```js
+   app.use(helmet.frameguard({ action: 'deny' }));
+   ```
+
+3. **`helmet.xssFilter()`**:
+   - Habilita el filtro XSS en navegadores antiguos.
+   ```js
+   app.use(helmet.xssFilter());
+   ```
+
+4. **`helmet.noSniff()`**:
+   - Previene que los navegadores intenten adivinar el tipo de contenido.
+   ```js
+   app.use(helmet.noSniff());
+   ```
+
+5. **`helmet.hsts()`**:
+   - Habilita HTTP Strict Transport Security (HSTS) para forzar conexiones HTTPS.
+   ```js
+   app.use(helmet.hsts({ maxAge: 31536000 })); // 1 año
+   ```
+
+6. **`helmet.contentSecurityPolicy()`**:
+   - Configura una política de seguridad de contenido (CSP) para controlar qué recursos pueden cargarse.
+   ```js
+   app.use(
+     helmet.contentSecurityPolicy({
+       directives: {
+         defaultSrc: ["'self'"],
+         scriptSrc: ["'self'", "'unsafe-inline'"],
+       },
+     })
+   );
+   ```
+
+---
+
+### Configuración avanzada:
+Puedes personalizar Helmet habilitando o deshabilitando protecciones específicas:
+
+```js
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Deshabilitar CSP
+    frameguard: { action: 'sameorigin' }, // Permitir iframes del mismo origen
+  })
+);
+```
+
+---
+
+### Resumen:
+- **Helmet** es un middleware de seguridad para Express.js que protege tu aplicación configurando encabezados HTTP.
+- Es fácil de usar y modular, lo que te permite habilitar o deshabilitar protecciones según tus necesidades.
+- Es una herramienta esencial para mejorar la seguridad de aplicaciones web en Node.js.
+
+
+##  ¿Qué es req.body en Express?
+req.body contiene los datos enviados en el cuerpo de una solicitud HTTP POST o PUT. Para acceder a él, es necesario usar middleware como express.json() o express.urlencoded().
+
+```js
+app.use(express.json());  // Middleware para analizar JSON
+
+app.post('/data', (req, res) => {
+  console.log(req.body);  // Muestra los datos del cuerpo de la solicitud
+  res.send('Datos recibidos');
+});
+
+```
+
+## ¿Qué es req.query en Express?
+req.query es un objeto que contiene los parámetros de la cadena de consulta (query string) de la URL en una solicitud GET.
+
+```js
+app.get('/saludo', (req, res) => {
+  console.log(req.query.nombre);  // Muestra el valor del parámetro 'nombre' en la URL
+  res.send(`Hola, ${req.query.nombre}`);
+});
+```
+
+## ¿Qué es req.params en Express?
+req.params contiene los parámetros de ruta definidos en las rutas dinámicas de Express.
+
+```js
+app.get('/usuario/:id', (req, res) => {
+  console.log(req.params.id);  // Muestra el valor del parámetro 'id' de la ruta
+  res.send(`Usuario con ID: ${req.params.id}`);
+});
+
+```
+
