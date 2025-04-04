@@ -1818,3 +1818,45 @@ app.get('/usuario/:id', (req, res) => {
 
 ```
 
+## ¿Qué es res.send() en Express?
+res.send() se usa para enviar una respuesta al cliente. Puede ser un texto, un objeto o un buffer.
+
+```js
+app.get('/', (req, res) => {
+  res.send('Hola Mundo');
+});
+
+```
+
+ ¿Qué es res.json() en Express?
+res.json() se utiliza para enviar una respuesta JSON al cliente.
+```js
+app.get('/usuario', (req, res) => {
+  res.json({ nombre: 'Juan', edad: 25 });
+});
+
+```
+
+## ¿Cómo utilizar console.time() y console.timeEnd()?
+console.time() y console.timeEnd() se usan para medir el tiempo de ejecución de un bloque de código.
+
+```js
+console.time('miTiempo');
+
+setTimeout(() => {
+  console.timeEnd('miTiempo');  // Muestra el tiempo que pasó desde 'miTiempo'
+}, 1000);
+```
+
+## ¿Cómo manejar múltiples versiones de una API en Express?
+Puedes manejar diferentes versiones de una API utilizando rutas con prefijos que representan la versión.
+
+```js
+app.get('/v1/usuario', (req, res) => {
+  res.send('Versión 1 de la API');
+});
+
+app.get('/v2/usuario', (req, res) => {
+  res.send('Versión 2 de la API');
+});
+```
