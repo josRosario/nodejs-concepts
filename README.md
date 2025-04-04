@@ -303,3 +303,155 @@ console.log(buf.toString()); // 'Hola.js'
 - Muy usados internamente por Streams.
 
 - Puedes trabajar con diferentes codificaciones: 'utf8', 'ascii', 'base64', 'hex', etc.
+
+
+ ## ¿Qué es process en Node.js?
+ process es un objeto global que proporciona información sobre el proceso de Node.js en ejecución, como las variables de entorno.
+
+```js
+console.log(process.env.PATH);  // Muestra las variables de entorno del sistema.
+```
+
+## . ¿Qué es setTimeout() en Node.js?
+setTimeout() es una función que ejecuta un código después de un retraso especificado.
+
+```js
+setTimeout(() => {
+  console.log('Este mensaje aparece después de 2 segundos');
+}, 2000);
+```
+
+## ¿Qué es setInterval() en Node.js?
+setInterval() ejecuta una función de manera repetitiva con un intervalo de tiempo determinado.
+
+```js
+setInterval(() => {
+  console.log('Este mensaje aparece cada 1 segundo');
+}, 1000);
+```
+## ¿Qué es clearInterval() en Node.js?
+clearInterval() detiene la ejecución repetitiva de setInterval().
+
+```js
+const id = setInterval(() => {
+  console.log('Cada segundo');
+}, 1000);
+
+setTimeout(() => {
+  clearInterval(id);  // Detiene el intervalo después de 5 segundos
+}, 5000);
+```
+
+## http
+
+El módulo **`http`** en Node.js es un módulo nativo que permite crear servidores HTTP y manejar solicitudes y respuestas. Es fundamental para construir aplicaciones web y APIs en Node.js sin necesidad de frameworks adicionales.
+
+---
+
+### Características principales:
+1. **Crear servidores HTTP**: Permite crear un servidor que escuche solicitudes en un puerto específico.
+2. **Manejar solicitudes y respuestas**: Proporciona objetos `req` (request) y `res` (response) para interactuar con las solicitudes y enviar respuestas.
+3. **Soporte para métodos HTTP**: Maneja métodos como `GET`, `POST`, `PUT`, `DELETE`, etc.
+4. **Ligero y eficiente**: Diseñado para aplicaciones de alto rendimiento.
+
+---
+
+### Ejemplo básico de un servidor HTTP:
+
+```js
+const http = require('http');
+
+// Crear un servidor
+const server = http.createServer((req, res) => {
+  // Configurar la respuesta
+  res.statusCode = 200; // Código de estado HTTP
+  res.setHeader('Content-Type', 'text/plain'); // Tipo de contenido
+  res.end('¡Hola, mundo!'); // Respuesta al cliente
+});
+
+// Escuchar en el puerto 3000
+server.listen(3000, () => {
+  console.log('Servidor ejecutándose en http://localhost:3000');
+});
+```
+
+---
+
+### Explicación del código:
+1. **`http.createServer()`**:
+   - Crea un servidor HTTP.
+   - Recibe un callback con los objetos `req` (solicitud) y `res` (respuesta).
+
+2. **`res.statusCode`**:
+   - Define el código de estado HTTP de la respuesta (por ejemplo, `200` para éxito).
+
+3. **`res.setHeader()`**:
+   - Configura los encabezados HTTP de la respuesta (por ejemplo, `Content-Type`).
+
+4. **`res.end()`**:
+   - Finaliza la respuesta y envía datos al cliente.
+
+5. **`server.listen()`**:
+   - Hace que el servidor escuche en un puerto específico (en este caso, el puerto `3000`).
+
+---
+
+### Ejemplo avanzado con rutas:
+
+```js
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+  if (req.url === '/' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<h1>Bienvenido a la página principal</h1>');
+  } else if (req.url === '/api' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ mensaje: 'Hola desde la API' }));
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Página no encontrada');
+  }
+});
+
+server.listen(3000, () => {
+  console.log('Servidor ejecutándose en http://localhost:3000');
+});
+```
+
+---
+
+### Ventajas del módulo `http`:
+- **Ligero**: No requiere dependencias externas.
+- **Control total**: Permite manejar solicitudes y respuestas de manera personalizada.
+- **Integración con otros módulos**: Se puede combinar con módulos como `fs` para servir archivos.
+
+---
+
+### Limitaciones:
+- **Código más complejo**: Para aplicaciones grandes, manejar rutas y lógica puede volverse complicado.
+- **No incluye middleware**: A diferencia de frameworks como Express, no tiene soporte integrado para middleware.
+
+---
+
+### Uso en combinación con frameworks:
+Aunque el módulo `http` es poderoso, frameworks como **Express** se construyen sobre él para simplificar el desarrollo de aplicaciones web. Por ejemplo:
+
+```js
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.send('¡Hola, mundo con Express!');
+});
+
+app.listen(3000, () => {
+  console.log('Servidor ejecutándose en http://localhost:3000');
+});
+```
+
+El módulo `http` sigue siendo la base de cualquier servidor en Node.js, incluso cuando se usan frameworks.
+
+Similar code found with 2 license types
+
+
