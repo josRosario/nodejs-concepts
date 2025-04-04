@@ -738,7 +738,478 @@ writeStream.write('Primera línea\n');
 writeStream.end('Última línea');
 ```
 
+
+## Event Emitter
+
+En Node.js, un **EventEmitter** es una clase del módulo nativo **`events`** que permite manejar eventos personalizados. Es la base del sistema de eventos en Node.js y se utiliza para emitir y escuchar eventos en aplicaciones.
+
+---
+
+### Características principales:
+1. **Emitir eventos**: Puedes emitir eventos personalizados con datos asociados.
+2. **Escuchar eventos**: Puedes registrar funciones (listeners) que se ejecuten cuando se emita un evento.
+3. **Herencia**: Muchas clases en Node.js, como `http.Server` o `fs.ReadStream`, heredan de `EventEmitter`.
+
+---
+
+### Ejemplo básico:
+
+```js
+const EventEmitter = require('events');
+
+// Crear una instancia de EventEmitter
+const emisor = new EventEmitter();
+
+// Registrar un listener para el evento 'saludo'
+emisor.on('saludo', (nombre) => {
+  console.log(`¡Hola, ${nombre}!`);
+});
+
+// Emitir el evento 'saludo'
+emisor.emit('saludo', 'Juan');
+```
+
+**Salida**:
+```
+¡Hola, Juan!
+```
+
+---
+
+### Métodos principales de `EventEmitter`:
+
+1. **`on(event, listener)`**:
+   - Registra un listener para un evento.
+   ```js
+   emisor.on('evento', () => console.log('Evento recibido'));
+   ```
+
+2. **`emit(event, [args])`**:
+   - Emite un evento, ejecutando todos los listeners registrados.
+   ```js
+   emisor.emit('evento', 'dato');
+   ```
+
+3. **`once(event, listener)`**:
+   - Registra un listener que se ejecuta solo una vez.
+   ```js
+   emisor.once('evento', () => console.log('Evento recibido una vez'));
+   ```
+
+4. **`removeListener(event, listener)`**:
+   - Elimina un listener específico para un evento.
+   ```js
+   const listener = () => console.log('Listener eliminado');
+   emisor.on('evento', listener);
+   emisor.removeListener('evento', listener);
+   ```
+
+5. **`removeAllListeners([event])`**:
+   - Elimina todos los listeners de un evento o de todos los eventos.
+   ```js
+   emisor.removeAllListeners('evento');
+   ```
+
+---
+
+### Ejemplo avanzado: Contador de eventos
+
+```js
+const EventEmitter = require('events');
+const emisor = new EventEmitter();
+
+let contador = 0;
+
+// Listener para contar eventos
+emisor.on('incrementar', () => {
+  contador++;
+  console.log(`Contador: ${contador}`);
+});
+
+// Emitir el evento varias veces
+emisor.emit('incrementar');
+emisor.emit('incrementar');
+emisor.emit('incrementar');
+```
+
+**Salida**:
+```
+Contador: 1
+Contador: 2
+Contador: 3
+```
+
+---
+
+### Uso en Node.js:
+Muchas clases en Node.js heredan de `EventEmitter`, como:
+
+1. **`http.Server`**:
+   ```js
+   const http = require('http');
+   const server = http.createServer();
+
+   server.on('request', (req, res) => {
+     res.end('Solicitud recibida');
+   });
+
+   server.listen(3000, () => console.log('Servidor en http://localhost:3000'));
+   ```
+
+2. **`fs.ReadStream`**:
+   ```js
+   const fs = require('fs');
+   const stream = fs.createReadStream('archivo.txt');
+
+   stream.on('data', (chunk) => {
+     console.log('Chunk recibido:', chunk.toString());
+   });
+   ```
+
 ---
 
 ### Resumen:
+- **`EventEmitter`** es una clase central en Node.js para manejar eventos personalizados.
+- Permite emitir y escuchar eventos de manera eficiente.
+- Es ampliamente utilizado en módulos nativos como `http`, `fs`, y `net`.
+- Facilita la creación de aplicaciones basadas en eventos.
+
+## ¿Qué es dotenv en Node.js?
+dotenv es una librería para cargar variables de entorno desde un archivo .env.
+
+### Resumen:
 El módulo **`fs`** es esencial para trabajar con el sistema de archivos en Node.js. Ofrece una API flexible que soporta operaciones sincrónicas, asincrónicas y basadas en promesas, lo que lo hace ideal para manejar archivos y directorios de manera eficiente.
+```js
+require('dotenv').config();
+console.log(process.env.MI_VARIABLE);
+```
+
+## express.static
+
+En **Express.js**, `express.static` es un middleware integrado que se utiliza para servir archivos estáticos, como HTML, CSS, JavaScript, imágenes, fuentes, etc., desde un directorio específico en tu aplicación.
+
+---
+
+### Características principales:
+1. **Sirve archivos estáticos**: Permite que los clientes accedan a archivos directamente desde el servidor.
+2. **Directorio público**: Define un directorio donde se almacenan los archivos estáticos.
+3. **Rendimiento**: Optimiza la entrega de archivos estáticos al manejar encabezados HTTP como `Cache-Control`.
+
+---
+
+### Sintaxis:
+```js
+app.use(express.static(root, [options]));
+```
+
+- **`root`**: Ruta del directorio que contiene los archivos estáticos.
+- **`options`**: Opciones adicionales (opcional), como configuración de caché.
+
+---
+
+### Ejemplo básico:
+Supongamos que tienes un directorio llamado `public` con un archivo `index.html`.
+
+**Estructura del proyecto**:
+```
+/public
+  └── index.html
+  └── styles.css
+  └── script.js
+app.js
+```
+
+**Código en `app.js`**:
+```js
+const express = require('express');
+const app = express();
+
+// Servir archivos estáticos desde el directorio "public"
+app.use(express.static('public'));
+
+// Iniciar el servidor
+app.listen(3000, () => {
+  console.log('Servidor ejecutándose en http://localhost:3000');
+});
+```
+
+**Acceso a los archivos estáticos**:
+- `http://localhost:3000/index.html`
+- `http://localhost:3000/styles.css`
+- `http://localhost:3000/script.js`
+
+---
+
+### Ejemplo con prefijo de ruta:
+Puedes agregar un prefijo para los archivos estáticos.
+
+```js
+app.use('/static', express.static('public'));
+```
+
+Ahora, los archivos estáticos estarán disponibles en:
+- `http://localhost:3000/static/index.html`
+- `http://localhost:3000/static/styles.css`
+
+---
+
+### Opciones comunes:
+1. **`maxAge`**: Configura la caché para los archivos estáticos.
+   ```js
+   app.use(express.static('public', { maxAge: '1d' })); // 1 día de caché
+   ```
+
+2. **`fallthrough`**: Si está en `false`, devuelve un error 404 si no se encuentra el archivo.
+   ```js
+   app.use(express.static('public', { fallthrough: false }));
+   ```
+
+---
+
+### Resumen:
+- `express.static` es un middleware para servir archivos estáticos como HTML, CSS, imágenes, etc.
+- Es útil para aplicaciones web que necesitan entregar recursos estáticos al cliente.
+- Puedes personalizar su comportamiento con opciones como caché y prefijos de ruta.
+
+
+## callback hell
+El **callback hell** en Node.js ocurre cuando se anidan múltiples funciones de callback, lo que hace que el código sea difícil de leer, mantener y depurar. Es un problema común en aplicaciones que manejan operaciones asincrónicas, como lectura de archivos, consultas a bases de datos o solicitudes HTTP.
+
+---
+
+### Ejemplo de callback hell:
+
+```js
+const fs = require('fs');
+
+fs.readFile('archivo1.txt', 'utf8', (err, data1) => {
+  if (err) return console.error(err);
+
+  fs.readFile('archivo2.txt', 'utf8', (err, data2) => {
+    if (err) return console.error(err);
+
+    fs.readFile('archivo3.txt', 'utf8', (err, data3) => {
+      if (err) return console.error(err);
+
+      console.log('Datos:', data1, data2, data3);
+    });
+  });
+});
+```
+
+En este ejemplo, las funciones de callback están anidadas unas dentro de otras, lo que genera un código en forma de "pirámide" que es difícil de seguir.
+
+---
+
+### Problemas del callback hell:
+1. **Dificultad para leer**: El código se vuelve confuso y difícil de entender.
+2. **Mantenimiento complicado**: Agregar o modificar lógica en callbacks anidados puede introducir errores.
+3. **Manejo de errores**: Es difícil manejar errores de manera centralizada.
+4. **Escalabilidad limitada**: A medida que aumenta la complejidad, el código se vuelve inmanejable.
+
+---
+
+### Soluciones al callback hell:
+
+#### 1. **Usar Promesas**
+Las promesas permiten encadenar operaciones asincrónicas de manera más legible.
+
+```js
+const fs = require('fs').promises;
+
+fs.readFile('archivo1.txt', 'utf8')
+  .then((data1) => {
+    console.log(data1);
+    return fs.readFile('archivo2.txt', 'utf8');
+  })
+  .then((data2) => {
+    console.log(data2);
+    return fs.readFile('archivo3.txt', 'utf8');
+  })
+  .then((data3) => {
+    console.log(data3);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+```
+
+---
+
+#### 2. **Usar `async/await`**
+`async/await` simplifica aún más el manejo de operaciones asincrónicas, haciendo que el código se parezca a uno síncrono.
+
+```js
+const fs = require('fs').promises;
+
+async function leerArchivos() {
+  try {
+    const data1 = await fs.readFile('archivo1.txt', 'utf8');
+    console.log(data1);
+
+    const data2 = await fs.readFile('archivo2.txt', 'utf8');
+    console.log(data2);
+
+    const data3 = await fs.readFile('archivo3.txt', 'utf8');
+    console.log(data3);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+leerArchivos();
+```
+
+---
+
+#### 3. **Usar librerías como `async`**
+La librería `async` proporciona utilidades para manejar operaciones asincrónicas de manera más estructurada.
+
+```js
+const async = require('async');
+const fs = require('fs');
+
+async.parallel(
+  [
+    (callback) => fs.readFile('archivo1.txt', 'utf8', callback),
+    (callback) => fs.readFile('archivo2.txt', 'utf8', callback),
+    (callback) => fs.readFile('archivo3.txt', 'utf8', callback),
+  ],
+  (err, results) => {
+    if (err) return console.error(err);
+    console.log('Datos:', results);
+  }
+);
+```
+
+---
+
+### Resumen:
+- **Callback hell** ocurre cuando las funciones de callback están anidadas excesivamente, dificultando la legibilidad y el mantenimiento del código.
+- **Soluciones**:
+  1. Usar **promesas** para encadenar operaciones.
+  2. Usar **async/await** para un código más limpio y legible.
+  3. Usar librerías como **`async`** para manejar flujos complejos.
+- Estas técnicas ayudan a escribir código asincrónico más limpio, escalable y fácil de mantener.
+
+## ¿Qué es async/await en Node.js?
+async/await es una forma de escribir código asincrónico de manera más legible, utilizando funciones asincrónicas y esperando resultados sin usar callbacks.
+
+```js
+async function obtenerDatos() {
+  let respuesta = await fetch('https://api.example.com/data');
+  let datos = await respuesta.json();
+  console.log(datos);
+}
+
+```
+
+## urlencoded
+En **Express.js**, `express.urlencoded` es un middleware integrado que se utiliza para analizar (parsear) los datos enviados en el cuerpo de una solicitud HTTP con el formato **`application/x-www-form-urlencoded`**. Este formato es común cuando se envían formularios HTML.
+
+---
+
+### Características principales:
+1. **Analiza datos del cuerpo**: Convierte los datos enviados en el cuerpo de la solicitud en un objeto JavaScript accesible a través de `req.body`.
+2. **Formato soportado**: Funciona con datos codificados como `application/x-www-form-urlencoded`.
+3. **Configuración opcional**: Permite opciones como el límite de tamaño del cuerpo y el manejo de arrays.
+
+---
+
+### Sintaxis:
+```js
+app.use(express.urlencoded([options]));
+```
+
+- **`options`**: Un objeto opcional para configurar el middleware. Algunas opciones comunes son:
+  - **`extended`**: Si es `true`, usa la librería `qs` para analizar datos complejos (como objetos anidados). Si es `false`, usa la librería `querystring`.
+  - **`limit`**: Tamaño máximo permitido para el cuerpo de la solicitud.
+
+---
+
+### Ejemplo básico:
+Supongamos que tienes un formulario HTML que envía datos al servidor:
+
+**Formulario HTML**:
+```html
+<form action="/submit" method="POST">
+  <input type="text" name="nombre" />
+  <input type="text" name="edad" />
+  <button type="submit">Enviar</button>
+</form>
+```
+
+**Servidor Express**:
+```js
+const express = require('express');
+const app = express();
+
+// Middleware para analizar datos urlencoded
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/submit', (req, res) => {
+  const { nombre, edad } = req.body;
+  res.send(`Nombre: ${nombre}, Edad: ${edad}`);
+});
+
+app.listen(3000, () => {
+  console.log('Servidor ejecutándose en http://localhost:3000');
+});
+```
+
+Cuando el formulario se envía, los datos estarán disponibles en `req.body` como un objeto:
+```js
+// Ejemplo de req.body
+{
+  nombre: 'Juan',
+  edad: '25'
+}
+```
+
+---
+
+### Opción `extended`:
+- **`extended: true`**: Permite analizar objetos anidados y datos complejos usando la librería `qs`.
+- **`extended: false`**: Analiza datos simples usando la librería `querystring`.
+
+**Ejemplo con datos anidados**:
+Formulario que envía datos anidados:
+```html
+<form action="/submit" method="POST">
+  <input type="text" name="usuario[nombre]" value="Juan" />
+  <input type="text" name="usuario[edad]" value="25" />
+  <button type="submit">Enviar</button>
+</form>
+```
+
+Con `extended: true`, los datos se analizarán como:
+```js
+{
+  usuario: {
+    nombre: 'Juan',
+    edad: '25'
+  }
+}
+```
+
+Con `extended: false`, los datos se analizarán como:
+```js
+{
+  'usuario[nombre]': 'Juan',
+  'usuario[edad]': '25'
+}
+```
+
+---
+
+### Resumen:
+- **`express.urlencoded`** es un middleware para analizar datos enviados en el cuerpo de solicitudes HTTP con el formato `application/x-www-form-urlencoded`.
+- Es útil para manejar formularios HTML.
+- La opción `extended` define cómo se analizan los datos (simples o complejos).
+- Los datos analizados están disponibles en `req.body`.
+
+## ¿Qué es process.env?
+process.env es un objeto que contiene las variables de entorno del sistema.
+```js
+console.log(process.env.NODE_ENV);  // Muestra el entorno (por ejemplo, 'production')
+```
