@@ -1213,3 +1213,450 @@ process.env es un objeto que contiene las variables de entorno del sistema.
 ```js
 console.log(process.env.NODE_ENV);  // Muestra el entorno (por ejemplo, 'production')
 ```
+
+## ¿Qué es path en Node.js?
+path es un módulo integrado en Node.js que permite trabajar con rutas de archivos y directorios.
+
+```js
+const path = require('path');
+const rutaCompleta = path.join(__dirname, 'archivo.txt');
+console.log(rutaCompleta);  // Muestra la ruta completa del archivo
+````
+## ¿Qué es url en Node.js?
+El módulo url permite analizar y resolver URLs en Node.js.
+
+```js
+const url = require('url');
+const miUrl = new URL('https://example.com/path?nombre=juan');
+
+console.log(miUrl.hostname);  // Imprime 'example.com'
+console.log(miUrl.pathname);  // Imprime '/path'
+```
+
+
+## child_process
+
+El módulo **`child_process`** en Node.js permite crear y controlar procesos secundarios desde un programa Node.js. Esto es útil para ejecutar comandos del sistema, scripts externos o dividir tareas pesadas en procesos separados.
+
+---
+
+### Características principales:
+1. **Ejecutar comandos del sistema**: Puedes ejecutar comandos como `ls`, `pwd`, o cualquier comando de shell.
+2. **Crear procesos secundarios**: Permite ejecutar otros programas o scripts Node.js en procesos separados.
+3. **Comunicación entre procesos**: Los procesos secundarios pueden comunicarse con el proceso principal mediante streams (`stdin`, `stdout`, `stderr`).
+
+---
+
+### Métodos principales de `child_process`:
+
+1. **`exec`**:
+   - Ejecuta un comando en el shell y devuelve el resultado como un callback.
+   - Ideal para comandos simples.
+
+   ```js
+   const { exec } = require('child_process');
+
+   exec('ls', (err, stdout, stderr) => {
+     if (err) {
+       console.error(`Error: ${err.message}`);
+       return;
+     }
+     console.log(`Salida: ${stdout}`);
+   });
+   ```
+
+---
+
+2. **`spawn`**:
+   - Crea un proceso secundario para ejecutar un comando.
+   - Devuelve un objeto `ChildProcess` que permite manejar streams (`stdout`, `stderr`).
+   - Ideal para tareas que generan grandes volúmenes de datos.
+
+   ```js
+   const { spawn } = require('child_process');
+
+   const proceso = spawn('ls', ['-lh', '/usr']);
+
+   proceso.stdout.on('data', (data) => {
+     console.log(`Salida: ${data}`);
+   });
+
+   proceso.stderr.on('data', (data) => {
+     console.error(`Error: ${data}`);
+   });
+
+   proceso.on('close', (code) => {
+     console.log(`Proceso terminado con código ${code}`);
+   });
+   ```
+
+---
+
+3. **`fork`**:
+   - Crea un proceso secundario específicamente para ejecutar otro archivo Node.js.
+   - Permite comunicación directa entre el proceso principal y el secundario mediante mensajes.
+
+   ```js
+   const { fork } = require('child_process');
+
+   const proceso = fork('hijo.js');
+
+   proceso.on('message', (mensaje) => {
+     console.log(`Mensaje del hijo: ${mensaje}`);
+   });
+
+   proceso.send('Hola desde el proceso principal');
+   ```
+
+   **Archivo `hijo.js`**:
+   ```js
+   process.on('message', (mensaje) => {
+     console.log(`Mensaje recibido: ${mensaje}`);
+     process.send('Hola desde el proceso hijo');
+   });
+   ```
+
+---
+
+4. **`execFile`**:
+   - Similar a `exec`, pero ejecuta directamente un archivo sin usar un shell.
+   - Más seguro porque no interpreta comandos del shell.
+
+   ```js
+   const { execFile } = require('child_process');
+
+   execFile('node', ['-v'], (err, stdout, stderr) => {
+     if (err) {
+       console.error(`Error: ${err.message}`);
+       return;
+     }
+     console.log(`Versión de Node.js: ${stdout}`);
+   });
+   ```
+
+---
+
+### Diferencias entre `exec`, `spawn`, `fork` y `execFile`:
+
+| Método      | Uso principal                          | Comunicación | Shell utilizado |
+|-------------|----------------------------------------|--------------|-----------------|
+| **`exec`**  | Ejecutar comandos del sistema          | No           | Sí              |
+| **`spawn`** | Ejecutar comandos con streams          | Sí           | No              |
+| **`fork`**  | Ejecutar scripts Node.js               | Sí           | No              |
+| **`execFile`** | Ejecutar archivos directamente       | No           | No              |
+
+---
+
+### Ejemplo práctico: Ejecutar un script Node.js en un proceso secundario
+
+**Archivo principal (`main.js`)**:
+```js
+const { fork } = require('child_process');
+
+const proceso = fork('worker.js');
+
+proceso.on('message', (mensaje) => {
+  console.log(`Mensaje del proceso secundario: ${mensaje}`);
+});
+
+proceso.send('Inicia el trabajo');
+```
+
+**Archivo secundario (`worker.js`)**:
+```js
+process.on('message', (mensaje) => {
+  console.log(`Mensaje recibido: ${mensaje}`);
+  process.send('Trabajo completado');
+});
+```
+
+**Salida**:
+```
+Mensaje recibido: Inicia el trabajo
+Mensaje del proceso secundario: Trabajo completado
+```
+
+---
+
+### Resumen:
+- **`child_process`** permite ejecutar comandos del sistema y crear procesos secundarios.
+- Métodos como `exec`, `spawn`, `fork` y `execFile` ofrecen diferentes formas de manejar procesos.
+- Es útil para tareas como ejecutar scripts externos, dividir cargas de trabajo y manejar procesos en paralelo.
+
+
+## ¿Qué es os en Node.js?
+El módulo os proporciona información sobre el sistema operativo, como el nombre, la plataforma y la memoria disponible.
+
+```js
+const os = require('os');
+console.log(os.platform());  // Imprime el sistema operativo (por ejemplo, 'linux')
+```
+
+## process.exit()
+
+En **Node.js**, `process.exit()` es un método que finaliza el proceso en ejecución de manera inmediata, devolviendo un código de salida al sistema operativo. Este método se utiliza para detener la ejecución de un programa cuando se ha completado una tarea o cuando ocurre un error crítico.
+
+---
+
+### Sintaxis:
+```js
+process.exit([code]);
+```
+
+- **`code`**: (Opcional) Un número entero que representa el código de salida. Por convención:
+  - `0`: Indica que el programa terminó correctamente.
+  - Cualquier otro número: Indica que ocurrió un error.
+
+---
+
+### Ejemplo básico:
+```js
+console.log('Inicio del programa');
+
+// Finaliza el proceso con éxito
+process.exit(0);
+
+console.log('Esto no se ejecutará');
+```
+
+**Salida**:
+```
+Inicio del programa
+```
+
+---
+
+### Ejemplo con código de error:
+```js
+if (!process.env.API_KEY) {
+  console.error('Error: Falta la variable de entorno API_KEY');
+  process.exit(1); // Finaliza con un código de error
+}
+```
+
+---
+
+### Cuándo usar `process.exit()`:
+1. **Finalizar el programa después de un error crítico**:
+   - Si ocurre un error que no puede ser manejado, puedes usar `process.exit()` para detener el programa.
+2. **Finalizar después de completar una tarea específica**:
+   - Por ejemplo, en scripts que realizan una tarea única, como migraciones de bases de datos.
+
+---
+
+### Advertencia:
+- **Evitar usarlo innecesariamente**: `process.exit()` detiene el Event Loop de inmediato, incluso si hay operaciones pendientes (como callbacks o promesas). Esto puede causar comportamientos inesperados.
+- **Alternativa**: En lugar de usar `process.exit()`, permite que el programa termine naturalmente cuando no haya más tareas pendientes.
+
+---
+
+### Ejemplo con promesas pendientes:
+```js
+console.log('Inicio del programa');
+
+setTimeout(() => {
+  console.log('Esto no se ejecutará si usas process.exit()');
+}, 1000);
+
+process.exit(0); // Finaliza inmediatamente
+```
+
+---
+
+### Resumen:
+- **`process.exit()`** detiene el proceso de Node.js inmediatamente.
+- Útil para manejar errores críticos o finalizar scripts específicos.
+- Usa con precaución, ya que puede interrumpir tareas pendientes en el Event Loop.
+
+
+## global
+
+En **Node.js**, **`global`** es un objeto global que actúa como el espacio de nombres principal para todas las variables y funciones globales. Es similar a `window` en los navegadores, pero está diseñado específicamente para el entorno de Node.js.
+
+---
+
+### Características principales:
+1. **Acceso global**: Las propiedades y métodos definidos en `global` están disponibles en todo el programa sin necesidad de importarlos.
+2. **No es necesario declararlo**: Puedes usar las propiedades de `global` directamente.
+3. **Evitar abusos**: Aunque es accesible en todo el programa, se recomienda evitar agregar variables personalizadas a `global` para prevenir conflictos.
+
+---
+
+### Ejemplo básico:
+```js
+console.log(global); // Muestra todas las propiedades globales
+```
+
+---
+
+### Propiedades y métodos comunes de `global`:
+
+1. **`console`**:
+   - Proporciona métodos para imprimir mensajes en la consola.
+   ```js
+   console.log('Hola, mundo');
+   ```
+
+2. **`setTimeout` y `setInterval`**:
+   - Métodos para ejecutar funciones después de un tiempo o de manera repetitiva.
+   ```js
+   setTimeout(() => console.log('Hola después de 1 segundo'), 1000);
+   setInterval(() => console.log('Hola cada 2 segundos'), 2000);
+   ```
+
+3. **`process`**:
+   - Proporciona información y control sobre el proceso en ejecución.
+   ```js
+   console.log(process.pid); // ID del proceso
+   ```
+
+4. **`Buffer`**:
+   - Maneja datos binarios.
+   ```js
+   const buffer = Buffer.from('Hola');
+   console.log(buffer.toString());
+   ```
+
+5. **`__dirname` y `__filename`**:
+   - Variables globales que indican el directorio y el archivo actual.
+   ```js
+   console.log(__dirname); // Ruta del directorio actual
+   console.log(__filename); // Ruta completa del archivo actual
+   ```
+
+---
+
+### Definir variables en `global`:
+Aunque puedes agregar variables al objeto `global`, **no es una buena práctica** porque puede causar conflictos y dificultar el mantenimiento del código.
+
+```js
+global.miVariable = 'Hola, mundo';
+console.log(miVariable); // Hola, mundo
+```
+
+---
+
+### Diferencia entre `global` y variables locales:
+Las variables definidas en `global` están disponibles en todo el programa, mientras que las variables locales solo están disponibles en el archivo o función donde se definen.
+
+```js
+// Variable global
+global.miVariable = 'Soy global';
+
+// Variable local
+const miVariableLocal = 'Soy local';
+
+console.log(global.miVariable); // Funciona
+console.log(miVariableLocal);   // Funciona
+```
+
+---
+
+### Resumen:
+- **`global`** es el objeto principal en Node.js que contiene propiedades y métodos globales.
+- Incluye herramientas como `console`, `setTimeout`, `process`, `Buffer`, entre otros.
+- Aunque puedes agregar variables personalizadas a `global`, no es recomendable por razones de mantenimiento y posibles conflictos.
+
+
+## process.argv
+
+
+En **Node.js**, **`process.argv`** es una propiedad del objeto global `process` que contiene un array con los argumentos pasados al script cuando se ejecuta desde la línea de comandos.
+
+---
+
+### Características principales:
+1. **Array de argumentos**: Contiene todos los argumentos proporcionados al ejecutar el script.
+2. **Estructura**:
+   - El primer elemento (`process.argv[0]`) es la ruta del ejecutable de Node.js.
+   - El segundo elemento (`process.argv[1]`) es la ruta del archivo del script que se está ejecutando.
+   - Los elementos restantes (`process.argv[2]` en adelante) son los argumentos proporcionados por el usuario.
+
+---
+
+### Ejemplo básico:
+Supongamos que ejecutas el siguiente script con argumentos:
+
+```bash
+node script.js arg1 arg2 arg3
+```
+
+**Código (`script.js`)**:
+```js
+console.log(process.argv);
+```
+
+**Salida**:
+```bash
+[
+  '/usr/local/bin/node',  // Ruta del ejecutable de Node.js
+  '/path/to/script.js',   // Ruta del archivo del script
+  'arg1',                 // Primer argumento
+  'arg2',                 // Segundo argumento
+  'arg3'                  // Tercer argumento
+]
+```
+
+---
+
+### Ejemplo práctico: Leer argumentos personalizados
+
+```js
+const args = process.argv.slice(2); // Ignorar los dos primeros elementos
+console.log('Argumentos:', args);
+```
+
+**Ejecución**:
+```bash
+node script.js --name=Juan --age=30
+```
+
+**Salida**:
+```bash
+Argumentos: [ '--name=Juan', '--age=30' ]
+```
+
+---
+
+### Ejemplo avanzado: Parsear argumentos
+
+Puedes procesar los argumentos para extraer valores clave.
+
+```js
+const args = process.argv.slice(2);
+const params = {};
+
+args.forEach(arg => {
+  const [key, value] = arg.split('=');
+  params[key.replace('--', '')] = value;
+});
+
+console.log(params);
+```
+
+**Ejecución**:
+```bash
+node script.js --name=Juan --age=30
+```
+
+**Salida**:
+```bash
+{ name: 'Juan', age: '30' }
+```
+
+---
+
+### Usos comunes:
+1. **Configurar opciones del script**:
+   - Pasar parámetros como nombres de archivos, configuraciones, etc.
+2. **Automatización**:
+   - Usar argumentos para personalizar tareas en scripts de automatización.
+3. **CLI (Command Line Interface)**:
+   - Crear herramientas de línea de comandos.
+
+---
+
+### Resumen:
+- **`process.argv`** es un array que contiene los argumentos pasados al script desde la línea de comandos.
+- Es útil para crear scripts dinámicos y herramientas CLI.
+- Puedes procesar los argumentos para extraer valores clave y personalizar el comportamiento del script.
