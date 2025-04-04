@@ -46,3 +46,89 @@ Timeout
 ```
 
 Esto ocurre porque `setImmediate` se ejecuta antes que `setTimeout` si ambos se programan en el mismo ciclo del Event Loop.
+
+## ¿Qué es un Callback en Node.js?
+
+Un callback es una función que se pasa como argumento a otra función y se ejecuta cuando esa función termina de ejecutarse.
+
+```js
+
+function saludo(nombre, callback) {
+  console.log(`Hola ${nombre}`);
+  callback();
+}
+
+saludo('Juan', () => console.log('¡Saludos completados!'));
+
+```
+
+En Node.js, la diferencia entre `import` y `require` radica en el sistema de módulos que utilizan y en cómo se comportan:
+
+---
+
+### 1. **`require`**:
+   - Forma parte del sistema de módulos **CommonJS**.
+   - Es la forma tradicional de importar módulos en Node.js.
+   - Se utiliza con la función `require()`.
+
+   **Ejemplo**:
+   ```js
+   const fs = require('fs'); // Importa el módulo 'fs'
+   const miModulo = require('./miModulo'); // Importa un archivo local
+   ```
+
+   **Características**:
+   - Es síncrono: carga el módulo en el momento en que se llama.
+   - Compatible con todas las versiones de Node.js.
+   - No requiere configuración adicional.
+
+---
+
+### 2. **`import`**:
+   - Forma parte del sistema de módulos **ESM (ECMAScript Modules)**.
+   - Es la forma moderna de importar módulos en JavaScript.
+   - Se utiliza con la palabra clave `import`.
+
+   **Ejemplo**:
+   ```js
+   import fs from 'fs'; // Importa el módulo 'fs'
+   import miModulo from './miModulo.js'; // Importa un archivo local
+   ```
+
+   **Características**:
+   - Es asíncrono: los módulos se cargan de manera diferida.
+   - Requiere que el archivo tenga la extensión `.mjs` o que el campo `"type": "module"` esté definido en el archivo `package.json`.
+   - Compatible con ES6 y versiones modernas de Node.js (a partir de la versión 12 con soporte completo en la versión 14).
+
+---
+
+### Diferencias clave:
+
+| Característica       | `require` (CommonJS)         | `import` (ESM)              |
+|----------------------|------------------------------|-----------------------------|
+| **Sistema de módulos** | CommonJS                   | ECMAScript Modules (ESM)    |
+| **Sincronía**         | Síncrono                   | Asíncrono                   |
+| **Soporte**           | Todas las versiones de Node.js | Node.js 12+ (estable en 14) |
+| **Extensión**         | `.js`                      | `.mjs` o `"type": "module"` |
+| **Uso dinámico**      | Permitido                  | Limitado (usa `import()` dinámico) |
+
+---
+
+### ¿Cuándo usar cada uno?
+- Usa **`require`** si trabajas en un proyecto existente o necesitas compatibilidad con versiones antiguas de Node.js.
+- Usa **`import`** si estás trabajando en un proyecto moderno y quieres aprovechar las características de ES6+.
+
+---
+
+### Ejemplo combinado:
+Si necesitas usar `import` en un proyecto basado en CommonJS, puedes habilitarlo con `import()` dinámico:
+
+```js
+(async () => {
+  const miModulo = await import('./miModulo.js');
+  console.log(miModulo);
+})();
+```
+
+
+
