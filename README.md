@@ -131,4 +131,62 @@ Si necesitas usar `import` en un proyecto basado en CommonJS, puedes habilitarlo
 ```
 
 
+## módulo 
 
+En Node.js, un módulo es un archivo que contiene código JavaScript que se puede reutilizar en otros archivos. Los módulos permiten dividir una aplicación en partes pequeñas y organizadas, facilitando el mantenimiento y la reutilización del código.
+
+## Tipos de módulos en Node.js
+- Módulos nativos: Son los que vienen incorporados con Node.js (como fs, http, path, etc.).
+
+- Módulos de terceros: Son paquetes instalados desde npm (como express, lodash, etc.).
+
+- Módulos propios: Son archivos creados por ti mismo dentro de tu proyecto.
+
+
+## stream
+Un Stream (flujo) es una abstracción que permite trabajar con datos que se transmiten en partes pequeñas (chunks), en lugar de cargarlos todos en memoria de una sola vez. Esto es especialmente útil para trabajar con archivos grandes, redes, o cualquier tipo de entrada/salida.
+
+## 🚀 ¿Por qué usar Streams?
+- Mejor rendimiento (procesa datos a medida que llegan).
+- Menor uso de memoria.
+- Ideal para lectura/escritura de archivos grandes, transmisión de video/audio, etc.
+
+## 🔄 Tipos de Streams en Node.js
+- Readable Streams (Lectura)
+Te permiten leer datos pieza por pieza.
+Ejemplo: leyendo un archivo o recibiendo datos de una petición HTTP.
+
+- Writable Streams (Escritura)
+Te permiten escribir datos en una fuente destino.
+Ejemplo: escribir en un archivo o enviar una respuesta HTTP.
+
+- Duplex Streams (Lectura y Escritura)
+Permiten leer y escribir datos al mismo tiempo.
+Ejemplo: un socket TCP.
+
+- Transform Streams (Transformación)
+Son duplex streams que modifican los datos en el camino.
+Ejemplo: comprimir un archivo, convertir texto a mayúsculas, etc.
+
+```js
+const fs = require('fs');
+
+// Leer desde un archivo
+const readableStream = fs.createReadStream('entrada.txt');
+
+// Escribir en otro archivo
+const writableStream = fs.createWriteStream('salida.txt');
+
+// Pasa los datos de lectura directamente a escritura
+readableStream.pipe(writableStream);
+
+```
+
+## 🔧 Eventos comunes en Streams
+- 'data': cuando se recibe un chunk de datos.
+
+- 'end': cuando ya no hay más datos que leer.
+
+- 'error': si ocurre algún error.
+
+- 'finish': cuando se termina de escribir.
