@@ -6,46 +6,293 @@
 Node.js es un entorno de ejecución para JavaScript en el lado del servidor basado en el motor V8 de Google Chrome.
 
 ## ¿Qué es el Event Loop en Node.js?
+**El Event Loop de Node.js** es el mecanismo que permite a Node manejar operaciones asíncronas de manera no bloqueante. Está basado en la arquitectura de libuv, una biblioteca C que proporciona un loop de eventos multiplataforma.
 
-El **Event Loop** en Node.js es el mecanismo que permite manejar múltiples operaciones simultáneamente en un solo hilo, utilizando un modelo de programación asincrónico y no bloqueante. Es el núcleo de cómo Node.js gestiona las operaciones de entrada/salida (I/O) de manera eficiente.
+---
 
-### ¿Cómo funciona?
-1. **Operaciones bloqueantes** como leer archivos, acceder a bases de datos o realizar solicitudes HTTP se delegan a hilos del sistema o APIs externas.
-2. Mientras tanto, el **Event Loop** sigue ejecutando otras tareas en el hilo principal.
-3. Cuando una operación asincrónica se completa, el Event Loop coloca su callback en la cola de tareas para ser ejecutado.
+### **Índice de las partes del Event Loop en Node.js**
+1. **Call Stack (Pila de llamadas)**  
+   - Donde se ejecuta el código sincrónico.
+   
+2. **Node APIs y libuv**  
+   - Manejan operaciones asíncronas como temporizadores, E/S, y más.
 
-### Fases del Event Loop:
-1. **Timers**: Ejecuta callbacks de funciones como `setTimeout` y `setInterval` cuyo tiempo ha expirado.
-2. **I/O Callbacks**: Procesa callbacks de operaciones I/O (como lectura de archivos).
-3. **Idle, Prepare**: Interno, usado por Node.js.
-4. **Poll**: Recupera nuevas I/O y ejecuta callbacks relacionados.
-5. **Check**: Ejecuta callbacks de `setImmediate`.
-6. **Close Callbacks**: Maneja eventos de cierre, como `socket.on('close')`.
+3. **Callback Queue (Cola de tareas)**  
+   - Donde se colocan las tareas asíncronas listas para ejecutarse.
 
-### Ejemplo:
-```js
-console.log('Inicio');
+4. **Microtask Queue (Cola de Microtareas)**  
+   - Cola de tareas de alta prioridad como `Promise.then` y `process.nextTick`.
 
-setTimeout(() => {
-  console.log('Timeout');
-}, 0);
+5. **Fases del Event Loop**  
+   - **Timers**: Maneja `setTimeout` y `setInterval`.
+   - **Callbacks**: Maneja callbacks de operaciones asíncronas como E/S.
+   - **Poll**: Procesa operaciones de E/S pendientes.
+   - **Check**: Maneja `setImmediate`.
+   - **Close Callbacks**: Maneja eventos de cierre como `socket.on('close')`.
 
-setImmediate(() => {
-  console.log('Immediate');
-});
+---
 
-console.log('Fin');
+### **1. Call Stack (Pila de llamadas)**
+
+**Concepto**:  
+El **Call Stack** es donde se ejecuta el código sincrónico. Cada vez que llamas a una función, esta se agrega al Call Stack. Cuando termina, se elimina.
+
+**Ejemplo**:
+```javascript
+function primera() {
+    console.log("Primera función");
+    segunda();
+}
+
+function segunda() {
+    console.log("Segunda función");
+}
+
+primera();
+console.log("Fin del programa");
 ```
 
-**Salida:**
+**Salida**:
+```
+Primera función
+Segunda función
+Fin del programa
+```
+
+**Explicación**:
+1. `primera()` se agrega al Call Stack y se ejecuta.
+2. Dentro de `primera()`, se llama a `segunda()`, que también se agrega al Call Stack.
+3. Cuando `segunda()` termina, se elimina del Call Stack.
+4. Finalmente, `console.log("Fin del programa")` se ejecuta.
+
+---
+
+### **2. Node APIs y libuv**
+
+**Concepto**:  
+Node.js utiliza **libuv**, una biblioteca que maneja operaciones asíncronas como temporizadores, E/S, y más. Estas operaciones se delegan a las APIs de Node y se procesan fuera del Call Stack.
+
+**Ejemplo**:
+```javascript
+console.log("Inicio");
+
+setTimeout(() => {
+    console.log("setTimeout ejecutado");
+}, 1000);
+
+console.log("Fin");
+```
+
+**Explicación**:
+1. `console.log("Inicio")` y `console.log("Fin")` se ejecutan en el Call Stack.
+2. `setTimeout` delega su callback a las APIs de Node y se procesa en **libuv**.
+3. Después de 1 segundo, el callback de `setTimeout` se coloca en la **Callback Queue**.
+
+---
+
+### **3. Callback Queue (Cola de tareas)**
+
+**Concepto**:  
+La **Callback Queue** almacena las tareas asíncronas listas para ejecutarse, como los callbacks de `setTimeout` o `setInterval`. El Event Loop mueve estas tareas al Call Stack cuando está vacío.
+
+**Ejemplo**:
+```javascript
+console.log("Inicio");
+
+setTimeout(() => {
+    console.log("Callback de setTimeout");
+}, 0);
+
+console.log("Fin");
+```
+
+**Salida**:
 ```
 Inicio
 Fin
-Immediate
-Timeout
+Callback de setTimeout
 ```
 
-Esto ocurre porque `setImmediate` se ejecuta antes que `setTimeout` si ambos se programan en el mismo ciclo del Event Loop.
+**Explicación**:
+1. `console.log("Inicio")` y `console.log("Fin")` se ejecutan primero.
+2. El callback de `setTimeout` se coloca en la **Callback Queue** y se ejecuta después de que el Call Stack esté vacío.
+
+---
+
+### **4. Microtask Queue (Cola de Microtareas)**
+
+**Concepto**:  
+La **Microtask Queue** tiene tareas de alta prioridad como `Promise.then` y `process.nextTick`. Estas tareas se ejecutan antes de las tareas en la Callback Queue.
+
+**Ejemplo**:
+```javascript
+console.log("Inicio");
+
+setTimeout(() => {
+    console.log("Callback de setTimeout");
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log("Microtask: Promise.then");
+});
+
+process.nextTick(() => {
+    console.log("Microtask: process.nextTick");
+});
+
+console.log("Fin");
+```
+
+**Salida**:
+```
+Inicio
+Fin
+Microtask: process.nextTick
+Microtask: Promise.then
+Callback de setTimeout
+```
+
+**Explicación**:
+1. `console.log("Inicio")` y `console.log("Fin")` se ejecutan primero.
+2. `process.nextTick` y `Promise.then` se ejecutan antes que el callback de `setTimeout` porque están en la **Microtask Queue**.
+
+---
+
+### **5. Fases del Event Loop**
+
+#### **Fase 1: Timers**
+Maneja los callbacks de `setTimeout` y `setInterval`.
+
+**Ejemplo**:
+```javascript
+setTimeout(() => {
+    console.log("Fase de Timers: setTimeout");
+}, 1000);
+```
+
+---
+
+#### **Fase 2: Callbacks**
+Maneja los callbacks de operaciones asíncronas como E/S.
+
+**Ejemplo**:
+```javascript
+const fs = require("fs");
+
+fs.readFile("archivo.txt", "utf8", (err, data) => {
+    if (err) throw err;
+    console.log("Fase de Callbacks: Lectura de archivo completada");
+});
+```
+
+---
+
+#### **Fase 3: Poll**
+Procesa operaciones de E/S pendientes y espera nuevas tareas.
+
+**Ejemplo**:
+```javascript
+const fs = require("fs");
+
+fs.readFile("archivo.txt", "utf8", (err, data) => {
+    if (err) throw err;
+    console.log("Fase de Poll: Lectura de archivo completada");
+});
+
+setTimeout(() => {
+    console.log("Fase de Timers: setTimeout");
+}, 0);
+```
+
+---
+
+#### **Fase 4: Check**
+Maneja los callbacks de `setImmediate`.
+
+**Ejemplo**:
+```javascript
+setImmediate(() => {
+    console.log("Fase de Check: setImmediate");
+});
+```
+
+---
+
+#### **Fase 5: Close Callbacks**
+Maneja eventos de cierre como `socket.on('close')`.
+
+**Ejemplo**:
+```javascript
+const net = require("net");
+
+const server = net.createServer((socket) => {
+    socket.end("Conexión cerrada");
+});
+
+server.listen(8080, () => {
+    console.log("Servidor escuchando en el puerto 8080");
+});
+
+server.on("close", () => {
+    console.log("Fase de Close Callbacks: Servidor cerrado");
+});
+
+server.close();
+```
+
+---
+
+### **Resumen del flujo del Event Loop**
+
+1. Ejecuta el código sincrónico en el **Call Stack**.
+2. Procesa las **Microtasks** (`Promise.then`, `process.nextTick`).
+3. Procesa las tareas en la fase de **Timers** (`setTimeout`, `setInterval`).
+4. Procesa las tareas en la fase de **Callbacks** (operaciones de E/S).
+5. Procesa las tareas en la fase de **Poll** (espera de E/S).
+6. Procesa las tareas en la fase de **Check** (`setImmediate`).
+7. Procesa las tareas en la fase de **Close Callbacks** (eventos de cierre).
+
+---
+
+### **Ejemplo completo del Event Loop**
+
+```javascript
+console.log("Inicio");
+
+setTimeout(() => {
+    console.log("Fase de Timers: setTimeout");
+}, 0);
+
+setImmediate(() => {
+    console.log("Fase de Check: setImmediate");
+});
+
+Promise.resolve().then(() => {
+    console.log("Microtask: Promise.then");
+});
+
+process.nextTick(() => {
+    console.log("Microtask: process.nextTick");
+});
+
+console.log("Fin");
+```
+
+**Salida**:
+```
+Inicio
+Fin
+Microtask: process.nextTick
+Microtask: Promise.then
+Fase de Timers: setTimeout
+Fase de Check: setImmediate
+```
+
+---
+
+### **Conclusión**
+El Event Loop en Node.js es el núcleo de su modelo asíncrono. Entender cómo funcionan sus partes (Call Stack, libuv, Microtask Queue, Callback Queue) y las fases del Event Loop te permitirá escribir código más eficiente y predecible.
+
 
 ## ¿Qué es un Callback en Node.js?
 
