@@ -67,6 +67,46 @@ Node.js facilita la creación de programas de red escalables. Algunas de sus ven
 - Integración con async/await: Las promesas permiten usar una sintaxis más clara y fácil de entender mediante async/await.
 
 ---
+## ¿Cómo definirías el término E/S? 
+
+- En Node.js, E/S se refiere a Entrada/Salida (Input/Output en inglés) y describe las operaciones mediante las cuales un programa interactúa con el mundo exterior, como leer archivos, recibir solicitudes HTTP, escribir en la consola, acceder a bases de datos, etc.
+---
+## ¿Por qué se prefiere Node.js sobre otras tecnologías de backend como Java y PHP?
+
+Algunas de las razones por las que se prefiere Node.js incluyen:
+
+- Node.js es muy rápido
+- Node Package Manager tiene más de 50.000 paquetes disponibles a disposición del desarrollador
+- Perfecto para aplicaciones web en tiempo real con uso intensivo de datos, ya que Node.js nunca espera a que una API devuelva datos.
+- Mejor sincronización de código entre el servidor y el cliente debido a la misma base de código
+- Es fácil para los desarrolladores web comenzar a utilizar Node.js en sus proyectos, ya que es una biblioteca de JavaScript.
+
+---
+## ¿Qué base de datos se utiliza más popularmente con Node.js?
+MongoDB es la base de datos más común utilizada con Node.js.  Es una base de datos NoSQL multiplataforma y orientada a documentos que ofrece alto rendimiento, alta disponibilidad y fácil escalabilidad.
+
+---
+##  ¿Cuál es el comando utilizado para importar bibliotecas externas?
+
+En Node.js, el comando o instrucción que se utiliza para importar bibliotecas externas depende del sistema de módulos que estés usando:
+**CommonJS (el sistema clásico de Node.js):**
+
+Usa require() para importar bibliotecas.
+```js
+  const express = require('express');
+```
+**ES Modules (ESM) (más moderno):**
+Usa import para importar módulos, similar a cómo se hace en el navegador.
+```js
+  import express from 'express';
+```
+**Para usar import, necesitas:**
+
+- Que el archivo tenga la extensión .mjs o
+
+- Que tu package.json tenga "type": "module"
+
+---
 ## ¿Qué es el Event Loop en Node.js?
 **El Event Loop de Node.js** es el mecanismo que permite a Node manejar operaciones asíncronas de manera no bloqueante. Está basado en la arquitectura de libuv, una biblioteca C que proporciona un loop de eventos multiplataforma.
 
