@@ -3,12 +3,47 @@
 
 ## ¿Qué es Node.js?
 
-Node.js es un entorno de ejecución para JavaScript en el lado del servidor basado en el motor V8 de Google Chrome.
+**Node.js** es un entorno de ejecución para JavaScript en el lado del servidor basado en el motor V8 de Google Chrome.
 
+**Node.js** es ideal para aplicaciones que necesitan manejar muchos datos, porque trabaja de manera asíncrona y se basa en eventos. Puedes usarlo para hacer aplicaciones web que manejan muchos datos, como sitios de videos en streaming. También es útil para crear: aplicaciones web en tiempo real, aplicaciones de red, aplicaciones generales
+
+---
+## ¿Por qué utilizar Node.js?
+Node.js facilita la creación de programas de red escalables. Algunas de sus ventajas incluyen:
+
+- Generalmente es rápido
+- Rara vez se bloquea
+- Todo es asincrónico 
+- Produce una gran concurrencia
+---
+## ¿Cómo funciona Node.js?
+
+- Motor V8 de Google Chrome: Node.js utiliza el motor V8, que es el mismo que usa Google Chrome para ejecutar JavaScript. Este motor convierte el código JavaScript en un lenguaje que la computadora pueda entender y ejecutar rápidamente.
+
+- Modelo asíncrono y basado en eventos: Node.js utiliza un modelo de ejecución asíncrona. Esto significa que, en lugar de esperar a que una tarea termine antes de empezar la siguiente, Node.js puede hacer varias cosas al mismo tiempo. Esto es muy útil cuando se manejan muchas solicitudes de datos, como en las aplicaciones web en tiempo real.
+
+- Event Loop (Bucle de eventos): Node.js tiene un "bucle de eventos", que es una forma en que se gestionan las tareas. Cuando una tarea (como una consulta a la base de datos) tarda un tiempo en completarse, Node.js no se queda esperando. En lugar de eso, sigue ejecutando otras tareas y cuando la tarea que estaba esperando termina, se ejecuta la función correspondiente. Esto mejora la eficiencia y el rendimiento.
+
+- Non-blocking (No bloqueante): Node.js no bloquea el hilo principal mientras espera que se completen las tareas. Esto significa que puede manejar muchas conexiones a la vez sin quedar "congelado", lo que lo hace ideal para aplicaciones con alta carga de usuarios, como chats en tiempo real o aplicaciones de streaming.
+
+  ---
+## ¿Por qué Node.js es de un solo subproceso?
+
+**Node.js** es de un solo subproceso porque su modelo asíncrono y el bucle de eventos le permiten manejar múltiples tareas de manera eficiente sin necesitar varios hilos, lo que lo hace más rápido y menos demandante en términos de recursos.
+
+---
+## ¿Qué es concurrencia?
+
+- La concurrencia se refiere a la capacidad de un sistema para manejar múltiples tareas en el mismo período de tiempo, pero no necesariamente al mismo tiempo. En un sistema concurrente, las tareas pueden estar siendo ejecutadas de manera intercalada (una se ejecuta, luego se detiene para dejar que otra se ejecute, y luego vuelve a la primera). No requiere que todas las tareas se ejecuten exactamente al mismo tiempo, pero sí que el sistema sea capaz de manejarlas sin que se bloqueen entre sí.
+
+---
+## ¿Qué es paralelismo?
+- El paralelismo, por otro lado, es cuando un sistema ejecuta múltiples tareas al mismo tiempo, usando varios procesadores o hilos. Esto significa que las tareas realmente se están ejecutando al mismo tiempo, en lugar de intercalarse entre sí.
+
+---
 ## ¿Qué es el Event Loop en Node.js?
 **El Event Loop de Node.js** es el mecanismo que permite a Node manejar operaciones asíncronas de manera no bloqueante. Está basado en la arquitectura de libuv, una biblioteca C que proporciona un loop de eventos multiplataforma.
 
----
 
 ### **Índice de las partes del Event Loop en Node.js**
 1. **Call Stack (Pila de llamadas)**  
