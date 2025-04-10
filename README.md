@@ -39,6 +39,32 @@ Node.js facilita la creación de programas de red escalables. Algunas de sus ven
 ---
 ## ¿Qué es paralelismo?
 - El paralelismo, por otro lado, es cuando un sistema ejecuta múltiples tareas al mismo tiempo, usando varios procesadores o hilos. Esto significa que las tareas realmente se están ejecutando al mismo tiempo, en lugar de intercalarse entre sí.
+---
+## Si Node.js es de un solo subproceso, ¿cómo maneja la concurrencia?
+
+- Aunque Node.js usa un solo hilo para ejecutar el código, maneja la concurrencia de manera eficiente gracias a su modelo asíncrono, su bucle de eventos y la delegación de tareas al sistema operativo para operaciones pesadas. Esto le permite manejar múltiples tareas simultáneamente sin bloquearse, lo que lo hace muy adecuado para aplicaciones con muchas solicitudes simultáneas.
+
+---
+## Explique la devolución de llamada en Node.js.
+
+- Operaciones asíncronas: En Node.js, muchas operaciones, como leer archivos, hacer consultas a bases de datos o realizar solicitudes de red, son asíncronas. Esto significa que no podemos esperar a que una operación termine antes de seguir con la siguiente, porque podría tardar mucho tiempo.
+
+- Paso de la devolución de llamada: En lugar de esperar bloqueado a que una operación termine, Node.js recibe una función callback que se ejecutará cuando la operación asíncrona termine. Esta función callback es pasada como argumento a la función que maneja la tarea asíncrona.
+
+- Ejecución de la devolución de llamada: Una vez que la operación asíncrona se completa, la función callback es llamada (es decir, ejecutada). Si la tarea fue exitosa, la callback maneja los resultados. Si hubo un error, la callback también puede manejar el error.
+
+---
+## ¿Cuáles son las ventajas de utilizar promesas en lugar de devoluciones de llamadas?
+
+- Legibilidad: Las promesas hacen que el código sea más limpio y fácil de leer.
+
+- Manejo de errores centralizado: El manejo de errores es más sencillo y no necesitas verificar los errores en cada nivel.
+
+- Encadenamiento y flujo claro: Las operaciones asíncronas se pueden encadenar de manera más clara y secuencial.
+
+- Composición fácil de múltiples tareas: Herramientas como Promise.all() y Promise.race() facilitan el manejo de varias tareas simultáneas.
+
+- Integración con async/await: Las promesas permiten usar una sintaxis más clara y fácil de entender mediante async/await.
 
 ---
 ## ¿Qué es el Event Loop en Node.js?
