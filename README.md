@@ -641,8 +641,6 @@ El patrón de reactor es la base del modelo de concurrencia de Node.js, permitie
 ## ¿Qué es una pirámide de pruebas en Node.js?
 
 
-
-
 La **pirámide de pruebas** es un concepto en el desarrollo de software que describe cómo estructurar y priorizar diferentes tipos de pruebas para garantizar la calidad del código. En el contexto de **Node.js**, la pirámide de pruebas se aplica para organizar las pruebas de una aplicación en niveles, asegurando que las pruebas sean eficientes, rápidas y confiables.
 
 ---
@@ -735,43 +733,638 @@ En **Node.js**, la pirámide de pruebas es una guía para estructurar las prueba
 Este enfoque asegura que las pruebas sean rápidas, confiables y escalables, ayudando a mantener la calidad del código y la experiencia del usuario.
 
 ---
+## Describe los códigos de salida de Node.js.
+
+En Node.js, los **códigos de salida** son valores numéricos que un proceso devuelve al sistema operativo cuando termina su ejecución. Estos códigos indican si el proceso finalizó correctamente o si ocurrió algún error. Los códigos de salida son útiles para depurar y manejar errores en aplicaciones o scripts.
+
+---
+
+### **Códigos de salida comunes en Node.js**
+
+1. **Código `0`**:
+   - **Descripción**: Indica que el proceso terminó correctamente, sin errores.
+   - **Ejemplo**:
+     ```javascript
+     process.exit(0); // Finaliza el proceso con éxito
+     ```
+
+2. **Código distinto de `0`**:
+   - **Descripción**: Indica que el proceso terminó con un error o de manera anormal.
+   - **Ejemplo**:
+     ```javascript
+     process.exit(1); // Finaliza el proceso con un error genérico
+     ```
+
+---
+
+### **Códigos de salida específicos de Node.js**
+
+Node.js tiene algunos códigos de salida predefinidos que indican errores específicos:
+
+| **Código** | **Descripción**                                                                 |
+|------------|---------------------------------------------------------------------------------|
+| `1`        | Error genérico no manejado.                                                    |
+| `3`        | Error interno de JavaScript (por ejemplo, un error en el motor V8).            |
+| `4`        | Error de inicialización fatal.                                                 |
+| `5`        | Error fatal en el sistema de depuración.                                       |
+| `6`        | Solicitud de depuración inválida.                                              |
+| `7`        | Error interno de asignación de memoria.                                        |
+| `9`        | Argumento inválido pasado a una opción de Node.js.                             |
+| `10`       | Error interno de JavaScript al iniciar el proceso.                             |
+| `12`       | Error de asignación de memoria al intentar cargar el motor V8.                |
+| `13`       | Error de inicialización del motor V8.                                          |
+| `>128`     | El proceso fue terminado por una señal del sistema (por ejemplo, `SIGKILL`).   |
+
+---
+
+### **Cómo manejar códigos de salida en Node.js**
+
+1. **Establecer un código de salida manualmente**:
+   Puedes usar `process.exit(code)` para finalizar un proceso con un código específico.
+   ```javascript
+   if (error) {
+       console.error('Ocurrió un error');
+       process.exit(1); // Finaliza con un código de error
+   } else {
+       console.log('Proceso completado con éxito');
+       process.exit(0); // Finaliza correctamente
+   }
+   ```
+
+2. **Detectar el código de salida de un proceso secundario**:
+   Si usas el módulo `child_process` para ejecutar procesos secundarios, puedes capturar su código de salida.
+   ```javascript
+   const { spawn } = require('child_process');
+
+   const proceso = spawn('node', ['script.js']);
+
+   proceso.on('close', (code) => {
+       console.log(`El proceso terminó con el código: ${code}`);
+   });
+   ```
+
+3. **Manejar errores no capturados**:
+   Puedes capturar errores no manejados y establecer un código de salida personalizado.
+   ```javascript
+   process.on('uncaughtException', (err) => {
+       console.error('Error no capturado:', err);
+       process.exit(1); // Finaliza con un código de error
+   });
+
+   // Ejemplo de error no capturado
+   throw new Error('Esto es un error no manejado');
+   ```
+
+---
+
+### **Códigos de salida relacionados con señales del sistema**
+Cuando un proceso es terminado por una señal del sistema (como `SIGKILL` o `SIGTERM`), el código de salida será mayor a `128`. Por ejemplo:
+- `137`: El proceso fue terminado con la señal `SIGKILL` (`128 + 9`).
+- `143`: El proceso fue terminado con la señal `SIGTERM` (`128 + 15`).
+
+---
+
+### **Conclusión**
+Los códigos de salida en Node.js son esenciales para indicar el estado de finalización de un proceso. El código `0` indica éxito, mientras que los códigos distintos de `0` representan errores o terminaciones anormales. Comprender y manejar estos códigos es fundamental para depurar aplicaciones y garantizar un comportamiento predecible en entornos de producción.
+
+---
+## ¿Cuáles son los diferentes tipos de solicitudes HTTP?
+
+Los diferentes tipos de solicitudes HTTP (también conocidos como **métodos HTTP**) son comandos que indican la acción que se desea realizar en un recurso del servidor. Estos métodos son fundamentales en el desarrollo de aplicaciones web y APIs. A continuación, se describen los métodos más comunes:
+
+---
+
+### **1. GET**
+- **Descripción**: Se utiliza para **obtener** datos de un servidor.
+- **Características**:
+  - No tiene cuerpo en la solicitud.
+  - Es idempotente (realizar la misma solicitud varias veces no cambia el estado del servidor).
+  - Generalmente se utiliza para recuperar información.
+- **Ejemplo**:
+  ```http
+  GET /usuarios HTTP/1.1
+  Host: ejemplo.com
+  ```
+
+---
+
+### **2. POST**
+- **Descripción**: Se utiliza para **enviar datos** al servidor y crear un nuevo recurso.
+- **Características**:
+  - Incluye un cuerpo en la solicitud con los datos a enviar.
+  - No es idempotente (enviar la misma solicitud varias veces puede crear múltiples recursos).
+- **Ejemplo**:
+  ```http
+  POST /usuarios HTTP/1.1
+  Host: ejemplo.com
+  Content-Type: application/json
+
+  {
+      "nombre": "Juan",
+      "edad": 30
+  }
+  ```
+
+---
+
+### **3. PUT**
+- **Descripción**: Se utiliza para **actualizar** un recurso existente o **crear** uno si no existe.
+- **Características**:
+  - Incluye un cuerpo en la solicitud con los datos del recurso.
+  - Es idempotente.
+- **Ejemplo**:
+  ```http
+  PUT /usuarios/1 HTTP/1.1
+  Host: ejemplo.com
+  Content-Type: application/json
+
+  {
+      "nombre": "Juan",
+      "edad": 31
+  }
+  ```
+
+---
+
+### **4. PATCH**
+- **Descripción**: Se utiliza para **actualizar parcialmente** un recurso existente.
+- **Características**:
+  - Similar a `PUT`, pero solo modifica los campos especificados en el cuerpo de la solicitud.
+  - No siempre es idempotente.
+- **Ejemplo**:
+  ```http
+  PATCH /usuarios/1 HTTP/1.1
+  Host: ejemplo.com
+  Content-Type: application/json
+
+  {
+      "edad": 32
+  }
+  ```
+
+---
+
+### **5. DELETE**
+- **Descripción**: Se utiliza para **eliminar** un recurso del servidor.
+- **Características**:
+  - Es idempotente.
+- **Ejemplo**:
+  ```http
+  DELETE /usuarios/1 HTTP/1.1
+  Host: ejemplo.com
+  ```
+
+---
+
+### **6. HEAD**
+- **Descripción**: Similar a `GET`, pero solo recupera los encabezados de la respuesta, sin el cuerpo.
+- **Características**:
+  - Útil para verificar si un recurso existe o para obtener metadatos.
+  - Es idempotente.
+- **Ejemplo**:
+  ```http
+  HEAD /usuarios HTTP/1.1
+  Host: ejemplo.com
+  ```
+
+---
+
+### **7. OPTIONS**
+- **Descripción**: Se utiliza para describir las opciones de comunicación disponibles para un recurso.
+- **Características**:
+  - Devuelve los métodos HTTP permitidos para un recurso.
+  - Es idempotente.
+- **Ejemplo**:
+  ```http
+  OPTIONS /usuarios HTTP/1.1
+  Host: ejemplo.com
+  ```
+
+---
+
+### **8. TRACE**
+- **Descripción**: Se utiliza para realizar una prueba de diagnóstico, devolviendo lo que el servidor recibe.
+- **Características**:
+  - Generalmente se utiliza para depuración.
+  - No es comúnmente usado por razones de seguridad.
+- **Ejemplo**:
+  ```http
+  TRACE /usuarios HTTP/1.1
+  Host: ejemplo.com
+  ```
+
+---
+
+### **9. CONNECT**
+- **Descripción**: Se utiliza para establecer un túnel hacia el servidor, generalmente para conexiones seguras como HTTPS.
+- **Características**:
+  - Específico para proxies.
+- **Ejemplo**:
+  ```http
+  CONNECT ejemplo.com:443 HTTP/1.1
+  ```
+
+---
+
+### **Resumen de los métodos más comunes**
+
+| **Método** | **Propósito**                  | **Idempotente** | **Cuerpo permitido** |
+|------------|--------------------------------|-----------------|-----------------------|
+| `GET`      | Obtener datos                  | Sí              | No                    |
+| `POST`     | Crear un recurso               | No              | Sí                    |
+| `PUT`      | Crear o reemplazar un recurso  | Sí              | Sí                    |
+| `PATCH`    | Actualizar parcialmente        | No              | Sí                    |
+| `DELETE`   | Eliminar un recurso            | Sí              | No (generalmente)     |
+| `HEAD`     | Obtener solo los encabezados   | Sí              | No                    |
+| `OPTIONS`  | Consultar métodos permitidos   | Sí              | No                    |
+
+---
+
+### **Conclusión**
+Los métodos HTTP son fundamentales para la comunicación entre clientes y servidores. Cada método tiene un propósito específico y debe usarse adecuadamente para garantizar que las aplicaciones sean eficientes, seguras y fáciles de mantener.
+
+---
+## ¿Cuál es el propósito de NODE_ENV?
+El propósito de la variable de entorno `NODE_ENV` en Node.js es definir el **entorno de ejecución** en el que se encuentra la aplicación. Esto permite configurar el comportamiento de la aplicación según el entorno, como **desarrollo**, **producción** o **pruebas**. Es una práctica común en aplicaciones Node.js para optimizar el rendimiento, habilitar o deshabilitar características específicas y gestionar configuraciones de manera eficiente.
+
+---
+
+### **Valores comunes de `NODE_ENV`**
+1. **`development`**:
+   - Indica que la aplicación está en un entorno de desarrollo.
+   - Se utiliza para habilitar herramientas como depuradores, mensajes detallados de error y recarga automática del servidor.
+   - Ejemplo:
+     ```bash
+     NODE_ENV=development node app.js
+     ```
+
+2. **`production`**:
+   - Indica que la aplicación está en un entorno de producción.
+   - Se utiliza para optimizar el rendimiento, deshabilitar mensajes de depuración y activar configuraciones específicas para producción.
+   - Ejemplo:
+     ```bash
+     NODE_ENV=production node app.js
+     ```
+
+3. **`test`**:
+   - Indica que la aplicación está en un entorno de pruebas.
+   - Se utiliza para configurar bases de datos de prueba, deshabilitar logs innecesarios y preparar el entorno para ejecutar pruebas automatizadas.
+   - Ejemplo:
+     ```bash
+     NODE_ENV=test mocha
+     ```
+
+---
+
+### **Cómo usar `NODE_ENV` en Node.js**
+Puedes acceder al valor de `NODE_ENV` mediante `process.env.NODE_ENV` en tu código. Esto permite condicionar el comportamiento de la aplicación según el entorno.
+
+**Ejemplo**:
+```javascript
+if (process.env.NODE_ENV === 'development') {
+    console.log('Modo desarrollo: habilitando herramientas de depuración.');
+} else if (process.env.NODE_ENV === 'production') {
+    console.log('Modo producción: optimizando el rendimiento.');
+} else {
+    console.log('Entorno no especificado, usando configuración predeterminada.');
+}
+```
+
+---
+
+### **Configuración de `NODE_ENV`**
+1. **En sistemas Unix/Linux o macOS**:
+   Puedes establecer `NODE_ENV` directamente en la línea de comandos:
+   ```bash
+   NODE_ENV=production node app.js
+   ```
+
+2. **En Windows**:
+   Usa el comando `set` para definir la variable:
+   ```cmd
+   set NODE_ENV=production && node app.js
+   ```
+
+3. **Usando herramientas como `dotenv`**:
+   Puedes definir `NODE_ENV` en un archivo `.env` para cargarlo automáticamente:
+   ```env
+   NODE_ENV=development
+   ```
+   Luego, usa la librería `dotenv` para cargar las variables:
+   ```javascript
+   require('dotenv').config();
+   console.log(`El entorno actual es: ${process.env.NODE_ENV}`);
+   ```
+
+---
+
+### **Beneficios de usar `NODE_ENV`**
+1. **Optimización del rendimiento**:
+   - En modo `production`, muchas librerías (como Express) deshabilitan características innecesarias, como el registro detallado de errores.
+   - Ejemplo: Express verifica `NODE_ENV` para habilitar o deshabilitar el middleware de manejo de errores detallados.
+
+2. **Configuraciones específicas por entorno**:
+   - Puedes cargar configuraciones diferentes según el entorno.
+   ```javascript
+   const config = require(`./config.${process.env.NODE_ENV}.js`);
+   ```
+
+3. **Facilita el desarrollo y despliegue**:
+   - Permite separar configuraciones de desarrollo, pruebas y producción, evitando errores al mover la aplicación entre entornos.
+
+---
+
+### **Conclusión**
+`NODE_ENV` es una variable de entorno clave en Node.js que permite configurar el comportamiento de la aplicación según el entorno de ejecución. Usarla correctamente mejora la eficiencia, facilita el desarrollo y asegura que la aplicación esté optimizada para producción.
+
+---
+
+## Enumere las distintas características de sincronización de Node.js
+Node.js es conocido por su modelo de ejecución **asíncrono y no bloqueante**, pero también proporciona características de sincronización para manejar tareas que requieren ejecución secuencial o control de concurrencia. A continuación, se enumeran las principales características de sincronización en Node.js:
+
+---
+
+### **1. Callbacks**
+- **Descripción**: Los callbacks son funciones que se ejecutan después de que una operación asíncrona se completa.
+- **Uso en sincronización**: Permiten ejecutar código en un orden específico al encadenar funciones.
+- **Ejemplo**:
+  ```javascript
+  const fs = require('fs');
+
+  fs.readFile('archivo.txt', 'utf8', (err, data) => {
+      if (err) throw err;
+      console.log('Contenido del archivo:', data);
+  });
+  ```
+
+---
+
+### **2. Promesas**
+- **Descripción**: Las promesas son una forma más estructurada de manejar asincronía, permitiendo encadenar operaciones y manejar errores de manera más limpia.
+- **Uso en sincronización**: Facilitan la ejecución secuencial de tareas asíncronas mediante `.then()` y `.catch()`.
+- **Ejemplo**:
+  ```javascript
+  const fs = require('fs').promises;
+
+  fs.readFile('archivo.txt', 'utf8')
+      .then(data => console.log('Contenido del archivo:', data))
+      .catch(err => console.error('Error:', err));
+  ```
+
+---
+
+### **3. Async/Await**
+- **Descripción**: `async/await` es una sintaxis moderna que permite escribir código asíncrono de manera más legible, como si fuera síncrono.
+- **Uso en sincronización**: Garantiza que las operaciones asíncronas se ejecuten en el orden esperado.
+- **Ejemplo**:
+  ```javascript
+  const fs = require('fs').promises;
+
+  async function leerArchivo() {
+      try {
+          const data = await fs.readFile('archivo.txt', 'utf8');
+          console.log('Contenido del archivo:', data);
+      } catch (err) {
+          console.error('Error:', err);
+      }
+  }
+
+  leerArchivo();
+  ```
+
+---
+
+### **4. Eventos y el EventEmitter**
+- **Descripción**: Node.js utiliza el patrón de eventos para manejar la comunicación entre diferentes partes de una aplicación.
+- **Uso en sincronización**: Permite coordinar tareas basadas en eventos personalizados.
+- **Ejemplo**:
+  ```javascript
+  const EventEmitter = require('events');
+  const emisor = new EventEmitter();
+
+  emisor.on('evento', () => {
+      console.log('Evento recibido');
+  });
+
+  emisor.emit('evento');
+  ```
+
+---
+
+### **5. Temporizadores (`setTimeout`, `setInterval`, `setImmediate`)**
+- **Descripción**: Los temporizadores permiten ejecutar código después de un intervalo de tiempo o en el siguiente ciclo del event loop.
+- **Uso en sincronización**: Controlan cuándo se ejecutan ciertas tareas.
+- **Ejemplo**:
+  ```javascript
+  console.log('Inicio');
+
+  setTimeout(() => {
+      console.log('Ejecutado después de 1 segundo');
+  }, 1000);
+
+  console.log('Fin');
+  ```
+
+---
+
+### **6. Flujos (Streams)**
+- **Descripción**: Los flujos son objetos que permiten leer o escribir datos de manera secuencial.
+- **Uso en sincronización**: Facilitan el manejo de grandes cantidades de datos en fragmentos (chunks), sincronizando la lectura y escritura.
+- **Ejemplo**:
+  ```javascript
+  const fs = require('fs');
+
+  const flujoLectura = fs.createReadStream('archivo.txt', { encoding: 'utf8' });
+  flujoLectura.on('data', (chunk) => {
+      console.log('Fragmento recibido:', chunk);
+  });
+  ```
+
+---
+
+### **7. Mutexes y Semáforos (a través de librerías)**
+- **Descripción**: Aunque Node.js no tiene soporte nativo para mutexes o semáforos, se pueden implementar mediante librerías externas para controlar el acceso concurrente a recursos compartidos.
+- **Uso en sincronización**: Garantizan que solo una tarea acceda a un recurso a la vez.
+- **Ejemplo** (usando la librería `async-mutex`):
+  ```javascript
+  const { Mutex } = require('async-mutex');
+  const mutex = new Mutex();
+
+  async function tareaCritica() {
+      const release = await mutex.acquire();
+      try {
+          console.log('Accediendo al recurso compartido');
+      } finally {
+          release();
+      }
+  }
+
+  tareaCritica();
+  ```
+
+---
+
+### **8. Worker Threads**
+- **Descripción**: Los hilos de trabajo permiten ejecutar tareas intensivas de CPU en paralelo sin bloquear el event loop.
+- **Uso en sincronización**: Sincronizan la comunicación entre el hilo principal y los hilos de trabajo.
+- **Ejemplo**:
+  ```javascript
+  const { Worker } = require('worker_threads');
+
+  const worker = new Worker('./worker.js');
+  worker.on('message', (message) => {
+      console.log('Mensaje del worker:', message);
+  });
+  worker.postMessage('Iniciar tarea');
+  ```
+
+---
+
+### **9. `process.nextTick()`**
+- **Descripción**: Permite ejecutar una función en la siguiente iteración del event loop, antes de que se procesen otras tareas asíncronas.
+- **Uso en sincronización**: Útil para priorizar tareas.
+- **Ejemplo**:
+  ```javascript
+  console.log('Inicio');
+
+  process.nextTick(() => {
+      console.log('Ejecutado en el siguiente ciclo del event loop');
+  });
+
+  console.log('Fin');
+  ```
+
+---
+
+### **10. Promesas combinadas (`Promise.all`, `Promise.race`, etc.)**
+- **Descripción**: Métodos para manejar múltiples promesas simultáneamente.
+- **Uso en sincronización**: Sincronizan la ejecución de varias tareas asíncronas.
+- **Ejemplo**:
+  ```javascript
+  const promesa1 = Promise.resolve('Tarea 1 completada');
+  const promesa2 = Promise.resolve('Tarea 2 completada');
+
+  Promise.all([promesa1, promesa2]).then((resultados) => {
+      console.log(resultados);
+  });
+  ```
+
+---
+
+### **Conclusión**
+Node.js ofrece varias características de sincronización, desde callbacks y promesas hasta herramientas más avanzadas como `Worker Threads` y librerías externas para mutexes. Estas herramientas permiten manejar tanto tareas asíncronas como sincronizar operaciones críticas de manera eficiente.
+
+---
+## ¿Qué es WASI y por qué se está introduciendo?
+
+En el contexto de **Node.js**, **WASI** (WebAssembly System Interface) se está introduciendo para permitir que los módulos de **WebAssembly (Wasm)** interactúen con el sistema operativo de manera segura y eficiente, ampliando las capacidades de WebAssembly dentro del ecosistema de Node.js.
+
+---
+
+### **¿Qué es WASI en Node.js?**
+WASI en Node.js es una interfaz que permite ejecutar módulos WebAssembly con acceso controlado a recursos del sistema, como el sistema de archivos, la red y otros servicios del sistema operativo. Node.js incluye soporte para WASI a través del módulo integrado `wasi`, que facilita la ejecución de módulos Wasm en un entorno compatible con WASI.
+
+---
+
+### **¿Por qué se introduce WASI en Node.js?**
+
+1. **Extender WebAssembly más allá del navegador**:
+   - WASI permite que los módulos Wasm se ejecuten en Node.js, lo que abre la puerta a casos de uso como herramientas CLI, procesamiento de datos y aplicaciones de servidor.
+
+2. **Portabilidad**:
+   - Los módulos Wasm con WASI pueden ejecutarse en cualquier entorno compatible con WASI, incluido Node.js, sin necesidad de modificar el código.
+
+3. **Seguridad**:
+   - WASI utiliza un modelo de seguridad basado en capacidades, lo que significa que los módulos Wasm solo tienen acceso a los recursos explícitamente otorgados, como un directorio específico o un archivo.
+
+4. **Ecosistema más amplio**:
+   - WASI en Node.js permite integrar módulos Wasm en aplicaciones Node.js, combinando la eficiencia de WebAssembly con la flexibilidad de Node.js.
+
+5. **Rendimiento**:
+   - WebAssembly es conocido por su alto rendimiento, y WASI permite aprovechar esta ventaja en aplicaciones Node.js para tareas intensivas de CPU o procesamiento de datos.
+
+---
+
+### **Ejemplo de uso de WASI en Node.js**
+
+1. **Instalar un módulo Wasm compatible con WASI**:
+   Supongamos que tienes un módulo Wasm que realiza cálculos matemáticos.
+
+2. **Código en Node.js para ejecutar el módulo Wasm con WASI**:
+   ```javascript
+   const fs = require('fs');
+   const { WASI } = require('wasi');
+
+   // Crear una instancia de WASI
+   const wasi = new WASI({
+       args: process.argv,
+       env: process.env,
+       preopens: {
+           '/sandbox': './sandbox' // Directorio accesible para el módulo Wasm
+       }
+   });
+
+   // Cargar el módulo Wasm
+   const wasmBuffer = fs.readFileSync('./modulo.wasm');
+   const wasmModule = new WebAssembly.Module(wasmBuffer);
+
+   // Crear una instancia de WebAssembly con WASI
+   const instance = new WebAssembly.Instance(wasmModule, {
+       wasi_snapshot_preview1: wasi.wasiImport
+   });
+
+   // Iniciar el módulo Wasm
+   wasi.start(instance);
+   ```
+
+   En este ejemplo:
+   - Se crea una instancia de WASI con acceso limitado al directorio `./sandbox`.
+   - Se carga un módulo Wasm y se ejecuta en un entorno seguro dentro de Node.js.
+
+---
+
+### **Ventajas de WASI en Node.js**
+
+1. **Integración con el ecosistema Node.js**:
+   - WASI permite combinar la potencia de WebAssembly con las capacidades de Node.js, como el acceso a módulos npm y APIs del sistema.
+
+2. **Seguridad**:
+   - WASI restringe el acceso de los módulos Wasm a recursos específicos, proporcionando un entorno aislado y seguro.
+
+3. **Portabilidad**:
+   - Los módulos Wasm con WASI pueden ejecutarse en cualquier entorno compatible, incluido Node.js, sin necesidad de cambios.
+
+4. **Rendimiento**:
+   - WebAssembly es ideal para tareas intensivas de CPU, y WASI permite aprovechar este rendimiento en aplicaciones Node.js.
+
+---
+
+### **Casos de uso de WASI en Node.js**
+
+1. **Herramientas CLI**:
+   - Crear herramientas de línea de comandos que utilicen módulos Wasm para cálculos rápidos y portables.
+
+2. **Procesamiento de datos**:
+   - Usar WebAssembly para tareas intensivas de CPU, como procesamiento de imágenes o cálculos matemáticos complejos.
+
+3. **Aplicaciones de servidor**:
+   - Integrar módulos Wasm en aplicaciones Node.js para mejorar el rendimiento en tareas específicas.
+
+4. **Entornos aislados**:
+   - Ejecutar código de terceros en un entorno seguro y controlado mediante WASI.
+
+---
+
+### **Conclusión**
+WASI en Node.js amplía las capacidades de WebAssembly al permitir que los módulos Wasm interactúen con el sistema operativo de manera segura y eficiente. Esto abre nuevas posibilidades para combinar el rendimiento de WebAssembly con la flexibilidad y el ecosistema de Node.js, haciendo que sea una herramienta poderosa para aplicaciones modernas.
+
+---
+
+## ¿Qué son las versiones LTS de Node.js?
+LTS significa soporte a largo plazo. Las versiones LTS de Node.js reciben soporte durante un periodo prolongado, normalmente 30 meses desde su lanzamiento. Estas versiones suelen ser más estables y fiables que las versiones no LTS y se recomiendan para producción.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 ## ¿Qué es el Event Loop en Node.js?
 **El Event Loop de Node.js** es el mecanismo que permite a Node manejar operaciones asíncronas de manera no bloqueante. Está basado en la arquitectura de libuv, una biblioteca C que proporciona un loop de eventos multiplataforma.
